@@ -23,7 +23,11 @@ export class GiftSectionComponent {
     },
     {
       question: '¿Hay aparcamiento?',
-      answer: '¡Si! Hay más de 50 plazas y en los alrededores también se puede aparcar',
+      answer: '¡Si! Hay más de 50 plazas y en los alrededores también se puede aparcar facilmente.',
+    },
+    {
+      question: '¿Que precio tiene el cubierto?',
+      answer: 'No lo sabemos todavía, tenemos que decidir aún el menú, aproximádamente unos 100€. Te informaremos cuando te demos la invitación y además lo indicaremos por aquí',
     },
     {
       question: '¿Puedo llevar acompañante?',

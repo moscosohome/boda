@@ -23,6 +23,33 @@
             }
           </div>
           <figcaption>{{ photo.caption }}</figcaption>
+
+          @if (photo.instagramEmbedUrl && photo.instagramUrl) {
+            <details class="proposal-moment" (toggle)="refreshScrollAnimations()">
+              <summary>
+                <span>
+                  <strong>Revive el momento</strong>
+                  <small>Ver la publicación de la pedida</small>
+                </span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6.75 9 5.25 5.25L17.25 9" />
+                </svg>
+              </summary>
+
+              <div class="proposal-moment-content">
+                <iframe
+                  [src]="photo.instagramEmbedUrl"
+                  title="Publicación de Instagram de la pedida de Cristina y Antonio"
+                  loading="lazy"
+                  allow="encrypted-media; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                ></iframe>
+                <a [href]="photo.instagramUrl" target="_blank" rel="noopener noreferrer">
+                  Abrir en Instagram
+                </a>
+              </div>
+            </details>
+          }
         </figure>
       }
     </div>
