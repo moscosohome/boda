@@ -74,33 +74,38 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
                 trigger: element,
                 start: 'top 88%',
                 end,
-                scrub: 0.65,
+                scrub: true,
               },
             })
             .fromTo(
               element,
-              { y: enterOffset, autoAlpha: 0 },
-              { y: 0, autoAlpha: 1, ease: 'none', duration: 0.18 },
+              { y: enterOffset },
+              { y: 0, ease: 'none', duration: 0.18 },
             )
-            .to(element, { y: 0, autoAlpha: 1, ease: 'none', duration: visibleDuration })
-            .to(element, { y: exitOffset, autoAlpha: 0, ease: 'none', duration: 0.18 });
+            .to(element, { y: 0, ease: 'none', duration: visibleDuration })
+            .to(element, { y: exitOffset, ease: 'none', duration: 0.18 });
         });
       };
 
-      const animateScrollEnterOnly = (selector: string): void => {
+      const animateScrollEnterOnly = (
+        selector: string,
+        options: { start?: string; end?: string } = {},
+      ): void => {
+        const start = options.start ?? 'top 96%';
+        const end = options.end ?? 'top 72%';
+
         gsap.utils.toArray<HTMLElement>(selector).forEach((element) => {
           gsap.fromTo(
             element,
-            { y: enterOffset, autoAlpha: 0 },
+            { y: enterOffset },
             {
               y: 0,
-              autoAlpha: 1,
               ease: 'none',
               scrollTrigger: {
                 trigger: element,
-                start: 'top 96%',
-                end: 'top 72%',
-                scrub: 0.65,
+                start,
+                end,
+                scrub: true,
               },
             },
           );
@@ -110,14 +115,13 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
       const animateSectionExit = (trigger: string, selector: string): void => {
         gsap.to(selector, {
           y: exitOffset,
-          autoAlpha: 0,
           stagger: 0.05,
           ease: 'none',
           scrollTrigger: {
             trigger,
             start: 'bottom 62%',
             end: 'bottom 18%',
-            scrub: 0.65,
+            scrub: true,
           },
         });
       };
@@ -187,14 +191,14 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         { end: 'top -12%', visibleDuration: 0.76 },
       );
 
-      animateScrollLifecycle(
+      animateScrollEnterOnly(
         [
           '.gift-card .section-kicker',
           '.gift-card [data-animate="title"]',
           '.gift-card .section-copy',
           '.gift-card .whatsapp-confirmation',
         ].join(', '),
-        { end: 'top -12%', visibleDuration: 0.76 },
+        { start: 'top 100%', end: 'top 55%' },
       );
 
       animateScrollEnterOnly('footer p, footer span');

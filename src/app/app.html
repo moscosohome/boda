@@ -1,1 +1,12 @@
 <router-outlet />
+
+<div
+  class="viewport-edge-fade viewport-edge-fade-top"
+  [class.is-visible]="showTopFade()"
+  aria-hidden="true"
+></div>
+<div
+  class="viewport-edge-fade viewport-edge-fade-bottom"
+  [class.is-visible]="showBottomFade()"
+  aria-hidden="true"
+></div>
