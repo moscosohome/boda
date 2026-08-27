@@ -1,0 +1,13 @@
+<main>
+  <app-hero-section />
+  <app-intro-section />
+  <app-story-section />
+  <app-timeline-section />
+  <app-event-section />
+  <!-- Sección de confirmación pausada temporalmente. Cambia showRsvpSection a true para reactivarla. -->
+  @if (showRsvpSection) {
+    <app-rsvp-section />
+  }
+  <app-gift-section />
+</main>
+<app-footer-section />

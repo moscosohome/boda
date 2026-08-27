@@ -1,0 +1,21 @@
+.intro-section {
+  position: relative;
+  z-index: 2;
+  padding: clamp(5.5rem, 14vw, 9rem) 0 clamp(6rem, 18vw, 13rem);
+}
+
+.section-shell {
+  max-width: 920px;
+}
+
+.intro-line {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2.55rem, 10vw, 6.6rem);
+  font-weight: 400;
+  line-height: 0.98;
+}
+
+.intro-line + .intro-line {
+  margin-top: 0.25rem;
+}

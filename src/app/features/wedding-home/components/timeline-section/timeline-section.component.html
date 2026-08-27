@@ -1,0 +1,20 @@
+<section class="timeline-section" aria-labelledby="timeline-title">
+  <div class="section-shell">
+    <p class="section-kicker">Timeline</p>
+    <h2 id="timeline-title" class="section-title" data-animate="title">Momentos que nos traen aquí</h2>
+    <div class="timeline-list">
+      <div class="timeline-line" aria-hidden="true">
+        <span class="timeline-line-fill"></span>
+      </div>
+      @for (milestone of milestones; track milestone.title) {
+        <article class="timeline-item">
+          <span class="timeline-dot" aria-hidden="true"></span>
+          <div>
+            <h3>{{ milestone.title }}</h3>
+            <p>{{ milestone.text }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>

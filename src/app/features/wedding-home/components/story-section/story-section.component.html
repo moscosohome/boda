@@ -1,0 +1,31 @@
+<section id="story" class="story-section" aria-labelledby="story-title">
+  <div class="section-shell story-grid">
+    <div class="story-copy">
+      <p class="section-kicker">Nuestra historia</p>
+      <h2 id="story-title" class="section-title" data-animate="title">Todo empezó un 7 de Septiembre de 2013</h2>
+      <p class="section-copy">
+        Aquí irá nuestra historia: los primeros planes, los viajes, los domingos sin prisa
+        y todas esas pequeñas cosas que nos han traído hasta este día.
+      </p>
+    </div>
+    <div class="photo-grid" aria-label="Espacios reservados para fotos de Cristina & Antonio">
+      @for (photo of photos; track photo.label) {
+        <figure class="photo-reveal">
+          <div class="photo-frame" [class.has-image]="getImageUrl(photo) && !photo.hasLoadError">
+            @if (getImageUrl(photo); as imageUrl) {
+              <img
+                [src]="imageUrl"
+                [alt]="photo.alt"
+                loading="lazy"
+                (error)="markImageAsUnavailable(photo)"
+              />
+            } @else {
+              <span>{{ photo.label }}</span>
+            }
+          </div>
+          <figcaption>{{ photo.caption }}</figcaption>
+        </figure>
+      }
+    </div>
+  </div>
+</section>

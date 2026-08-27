@@ -1,0 +1,12 @@
+@if (hasFinished()) {
+  <p class="countdown-finished">¡Hoy celebramos!</p>
+} @else {
+  <div class="countdown-grid" aria-label="Cuenta atrás para la boda">
+    @for (part of parts(); track part.label) {
+      <div class="countdown-part">
+        <strong>{{ part.value }}</strong>
+        <span>{{ part.label }}</span>
+      </div>
+    }
+  </div>
+}

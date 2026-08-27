@@ -1,0 +1,46 @@
+<section id="event" class="event-section" aria-labelledby="event-title">
+  <div class="section-shell event-grid">
+    <div>
+      <p class="section-kicker">El gran día</p>
+      <h2 id="event-title" class="section-title" data-animate="title">Nos vemos en {{ event.venue }}</h2>
+      <p class="section-copy">
+        Será una tarde para brindar, sentarnos juntos a la mesa y guardar un recuerdo
+        bonito de quienes nos acompañáis.
+      </p>
+    </div>
+    <article class="event-card">
+      <dl>
+        <div>
+          <dt>Fecha</dt>
+          <dd>{{ event.dateLabel }}</dd>
+        </div>
+        <div>
+          <dt>Hora</dt>
+          <dd>{{ event.timeLabel }}</dd>
+        </div>
+        <div>
+          <dt>Lugar</dt>
+          <dd>{{ event.venue }}</dd>
+        </div>
+      </dl>
+      <figure class="venue-photo" aria-label="Imagen de El Recreo San Luis">
+        <img
+          src="/images/recreo-san-luis.png"
+          alt="El Recreo San Luis"
+          width="1537"
+          height="1023"
+          loading="lazy"
+        />
+      </figure>
+      <div class="btn-row">
+        <a class="btn btn-primary" [href]="event.mapsUrl" target="_blank" rel="noopener">
+          Cómo llegar
+        </a>
+        <a class="btn" [href]="event.calendarUrl" target="_blank" rel="noopener">
+          Añadir al calendario
+        </a>
+      </div>
+      <app-countdown [targetDate]="targetDate" />
+    </article>
+  </div>
+</section>

@@ -1,0 +1,20 @@
+:host {
+  display: block;
+  opacity: 0;
+  transform: translateY(1.75rem);
+  transition:
+    opacity 700ms ease var(--reveal-delay),
+    transform 700ms ease var(--reveal-delay);
+}
+
+:host(.is-visible) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    opacity: 1;
+    transform: none;
+  }
+}

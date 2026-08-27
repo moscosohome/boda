@@ -1,0 +1,81 @@
+.story-section {
+  padding: clamp(5rem, 14vw, 10rem) 0;
+}
+
+.story-grid {
+  display: grid;
+  gap: clamp(2.5rem, 8vw, 6rem);
+}
+
+.story-copy {
+  align-self: start;
+}
+
+.photo-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+figure {
+  margin: 0;
+}
+
+.photo-frame {
+  position: relative;
+  display: grid;
+  min-height: clamp(18rem, 72vw, 30rem);
+  place-items: center;
+  border: 1px solid rgba(181, 154, 103, 0.34);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(145deg, rgba(122, 128, 96, 0.18), rgba(255, 250, 242, 0.86)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(181, 154, 103, 0.12) 0 1px,
+      transparent 1px 18px
+    );
+  color: rgba(94, 90, 82, 0.58);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.photo-frame.has-image {
+  min-height: clamp(26rem, 112vw, 43rem);
+  background: var(--color-ivory);
+}
+
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  object-fit: cover;
+  object-position: center;
+}
+
+figcaption {
+  margin-top: 0.65rem;
+  color: var(--color-warm-gray);
+  font-size: 0.92rem;
+}
+
+@media (min-width: 860px) {
+  .story-grid {
+    grid-template-columns: 0.82fr 1.18fr;
+  }
+
+  .story-copy {
+    position: sticky;
+    top: 6rem;
+  }
+
+  .photo-grid .photo-reveal:nth-child(2) {
+    margin-left: 16%;
+  }
+
+  .photo-grid .photo-reveal:nth-child(3) {
+    width: 82%;
+  }
+}

@@ -1,0 +1,27 @@
+<div class="faq-list">
+  @for (item of items(); track item.question; let index = $index) {
+    <article class="faq-item">
+      <h3>
+        <button
+          type="button"
+          [attr.aria-expanded]="openIndex() === index"
+          [attr.aria-controls]="'faq-panel-' + index"
+          [id]="'faq-button-' + index"
+          (click)="toggle(index)"
+        >
+          <span>{{ item.question }}</span>
+          <span class="faq-icon" aria-hidden="true"></span>
+        </button>
+      </h3>
+      <div
+        class="faq-panel"
+        [id]="'faq-panel-' + index"
+        role="region"
+        [attr.aria-labelledby]="'faq-button-' + index"
+        [hidden]="openIndex() !== index"
+      >
+        <p>{{ item.answer }}</p>
+      </div>
+    </article>
+  }
+</div>
