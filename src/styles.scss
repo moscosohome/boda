@@ -25,11 +25,13 @@
 html {
   scroll-behavior: smooth;
   background: var(--color-cream);
+  touch-action: pan-y;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  touch-action: pan-y;
   color: var(--color-ink);
   background:
     radial-gradient(circle at 18% 12%, rgba(216, 197, 155, 0.24), transparent 28rem),

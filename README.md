@@ -39,13 +39,13 @@ Ahí puedes cambiar:
 
 - Nombres: `Cristina & Antonio`.
 - Fecha visible: `4 de septiembre`.
-- Hora visible: `19:30`.
-- Lugar: `El Recreo San Luis`.
+- Hora visible: `Pendiente de confirmar · aprox. 19:30`.
+- Lugar: `Recreo San Luis`.
 - Fecha real del countdown: `startsAt`.
 - Enlace de Google Maps.
 - Enlace de Google Calendar.
 
-La fecha configurada para el countdown es `2027-09-04T19:30:00+02:00`, pensada para Europe/Madrid.
+La fecha provisional configurada para el countdown es `2027-09-04T19:30:00+02:00`, pensada para Europe/Madrid.
 
 ## Textos y secciones
 

@@ -7,22 +7,22 @@ import { Component } from '@angular/core';
   styleUrl: './timeline-section.component.scss',
 })
 export class TimelineSectionComponent {
-  protected readonly milestones = [
+  protected readonly schedule = [
     {
-      title: 'Nos conocimos',
-      text: 'Un primer encuentro que parecía pequeño y terminó cambiándolo todo.',
+      title: 'La ceremonia',
+      text: 'El momento de decir «sí, quiero».',
     },
     {
-      title: 'Primer viaje',
-      text: 'La primera escapada, las primeras fotos y la certeza de querer repetir.',
+      title: 'El cóctel',
+      text: 'Brindaremos, picaremos algo y nos haremos muchas fotos.',
     },
     {
-      title: 'La pedida',
-      text: 'Una pregunta sencilla, una respuesta inmensa y una fecha marcada.',
+      title: 'La cena',
+      text: 'Nos sentaremos juntos para celebrar como se merece.',
     },
     {
-      title: 'El gran día',
-      text: 'El momento de celebrarlo con las personas que forman parte de nuestra historia.',
+      title: 'La fiesta',
+      text: 'Bailaremos hasta que el cuerpo aguante.',
     },
   ];
 }

@@ -8,8 +8,8 @@ import { Component } from '@angular/core';
 })
 export class IntroSectionComponent {
   protected readonly lines = [
-    'Después de tantos momentos juntos,',
-    'queremos celebrar este día',
+    'Después de tantos capítulos juntos,',
+    'llega uno que queremos celebrar',
     'con vosotros.',
   ];
 }

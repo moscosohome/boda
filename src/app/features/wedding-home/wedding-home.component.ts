@@ -44,12 +44,21 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
 
       const animateScrollLifecycle = (
         selector: string,
-        options: { end?: string; visibleDuration?: number; skipLateSections?: boolean } = {},
+        options: {
+          end?: string;
+          visibleDuration?: number;
+          skipLateSections?: boolean;
+          skipEventSection?: boolean;
+        } = {},
       ): void => {
-        const end = options.end ?? 'bottom 12%';
+        const end = options.end ?? 'top -12%';
         const visibleDuration = options.visibleDuration ?? 0.64;
 
         gsap.utils.toArray<HTMLElement>(selector).forEach((element) => {
+          if (options.skipEventSection && element.closest('.event-section')) {
+            return;
+          }
+
           if (
             options.skipLateSections &&
             (element.closest('.faq-section') ||
@@ -98,6 +107,21 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         });
       };
 
+      const animateSectionExit = (trigger: string, selector: string): void => {
+        gsap.to(selector, {
+          y: exitOffset,
+          autoAlpha: 0,
+          stagger: 0.05,
+          ease: 'none',
+          scrollTrigger: {
+            trigger,
+            start: 'bottom 62%',
+            end: 'bottom 18%',
+            scrub: 0.65,
+          },
+        });
+      };
+
       gsap
         .timeline({
           scrollTrigger: {
@@ -125,7 +149,6 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.section-kicker',
           '[data-animate="title"]',
           '.section-copy',
-          '.photo-reveal',
           '.timeline-item',
           '.event-card dl > div',
           '.venue-photo img',
@@ -134,14 +157,34 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.countdown-finished',
           '.rsvp-panel',
         ].join(', '),
-        { skipLateSections: true },
+        { skipLateSections: true, skipEventSection: true },
       );
+
+      animateScrollLifecycle('.photo-reveal', {
+        end: 'bottom 12%',
+        visibleDuration: 0.68,
+      });
+
+      animateScrollEnterOnly(
+        [
+          '.event-section .section-kicker',
+          '.event-section [data-animate="title"]',
+          '.event-section .section-copy',
+          '.event-card dl > div',
+          '.venue-photo img',
+          '.event-card .btn-row',
+          '.countdown-part',
+          '.countdown-finished',
+        ].join(', '),
+      );
+
+      animateSectionExit('.event-section', '.event-copy, .event-card');
 
       animateScrollLifecycle(
         ['.faq-section .section-kicker', '.faq-section [data-animate="title"]', '.faq-item'].join(
           ', ',
         ),
-        { end: 'bottom -16%', visibleDuration: 0.76 },
+        { end: 'top -12%', visibleDuration: 0.76 },
       );
 
       animateScrollLifecycle(
@@ -151,7 +194,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.gift-card .section-copy',
           '.gift-card .whatsapp-confirmation',
         ].join(', '),
-        { end: 'bottom -24%', visibleDuration: 0.76 },
+        { end: 'top -12%', visibleDuration: 0.76 },
       );
 
       animateScrollEnterOnly('footer p, footer span');

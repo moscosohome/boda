@@ -19,37 +19,40 @@ export class StorySectionComponent {
   protected readonly photos: StoryPhoto[] = [
     {
       label: 'Foto 01',
-      caption: 'Un comienzo tranquilo',
+      caption: 'Una de nuestras primeras fotos juntos. Sin imaginar todo lo que vendría después.',
       imageUrls: ['/images/primera_foto.png'],
       alt: 'Cristina & Antonio al comienzo de su historia',
     },
     {
       label: 'Foto 02',
-      caption: 'Un viaje para recordar',
+      caption: 'Dos jovenés allá por 2015',
       imageUrls: ['/images/segunda_foto.png'],
       alt: 'Retrato en acuarela de Cristina & Antonio abrazados',
     },
     {
       label: 'Foto 03',
-      caption: 'Siempre juntos',
+      caption: 'Siempre juntos. 2018',
       imageUrls: ['/images/tercera_foto.png'],
       alt: 'Retrato en acuarela de Antonio besando a Cristina en la mejilla',
     },
     {
       label: 'Foto 04',
-      caption: 'Nuestro hogar',
+      caption: 'Nueva meta juntos y nueva etapa por empezar. Noviembre 2021',
       imageUrls: ['/images/cuarta_foto.png'],
       alt: 'Las manos de Cristina & Antonio formando un corazón alrededor de las llaves de su hogar',
     },
     {
       label: 'Foto 05',
-      caption: 'Cada aventura, juntos',
+      caption: 'Siempre caminando juntos. 2025',
       imageUrls: ['/images/quinta_foto.png'],
       alt: 'Cristina & Antonio paseando de la mano junto al mar',
     },
     {
       label: 'Foto 06',
-      caption: 'La pedida',
+      caption:
+        'Y llegó el día. Aquella tarde de diciembre, a las siete —porque el siete siempre ha sido nuestro número—, todo salió tal y como lo había imaginado. ' +
+        'Solo tú y yo, los nervios, París ante nosotros… y, de repente, la torre empezó a parpadear. ' +
+        'Era nuestro momento. 4 de diciembre de 2026',
       imageUrls: [
         '/images/pedida-paris.webp',
         '/images/pedida-paris.png',

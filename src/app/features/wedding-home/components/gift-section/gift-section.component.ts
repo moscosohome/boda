@@ -15,15 +15,15 @@ export class GiftSectionComponent {
   protected readonly faqs: FaqItem[] = [
     {
       question: '¿A qué hora empieza la boda?',
-      answer: 'La ceremonia está prevista para las 19:30.',
+      answer: 'La hora está pendiente de confirmar, pero será aproximadamente a las 19:30.',
     },
     {
       question: '¿Dónde es la celebración?',
-      answer: 'La boda se celebra en El Recreo San Luis.',
+      answer: 'La boda se celebra en el Recreo San Luis.',
     },
     {
       question: '¿Hay aparcamiento?',
-      answer: 'Añadiremos aquí las indicaciones definitivas sobre acceso y aparcamiento.',
+      answer: '¡Si! Hay más de 50 plazas y en los alrededores también se puede aparcar',
     },
     {
       question: '¿Puedo llevar acompañante?',
