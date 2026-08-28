@@ -3,11 +3,12 @@ import {
   FaqAccordionComponent,
   FaqItem,
 } from '../../../../shared/components/faq-accordion/faq-accordion.component';
+import { GuestMessageSectionComponent } from '../guest-message-section/guest-message-section.component';
 
 @Component({
   selector: 'app-gift-section',
   standalone: true,
-  imports: [FaqAccordionComponent],
+  imports: [FaqAccordionComponent, GuestMessageSectionComponent],
   templateUrl: './gift-section.component.html',
   styleUrl: './gift-section.component.scss',
 })
@@ -27,7 +28,8 @@ export class GiftSectionComponent {
     },
     {
       question: '¿Que precio tiene el cubierto?',
-      answer: 'No lo sabemos todavía, tenemos que decidir aún el menú, aproximádamente unos 100€. Te informaremos cuando te demos la invitación y además lo indicaremos por aquí',
+      answer:
+        'No lo sabemos todavía, tenemos que decidir aún el menú, aproximádamente unos 100€. Te informaremos cuando te demos la invitación y además lo indicaremos por aquí',
     },
     {
       question: '¿Puedo llevar acompañante?',

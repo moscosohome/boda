@@ -1,0 +1,111 @@
+<section class="guest-message-section" aria-labelledby="guest-message-title">
+  <div class="section-shell">
+    <div class="guest-message-disclosure">
+      <button
+        class="guest-message-toggle"
+        type="button"
+        [attr.aria-expanded]="isOpen()"
+        aria-controls="guest-message-panel"
+        (click)="toggleMessageForm()"
+      >
+        <span class="guest-message-heading">
+          <span class="section-kicker">Buzón de los novios</span>
+          <span id="guest-message-title" class="guest-message-title">
+            ¿Quieres dejarnos un mensajito?
+          </span>
+          <span class="guest-message-hint">Puedes firmarlo o enviarlo de forma anónima.</span>
+        </span>
+        <span class="disclosure-icon" aria-hidden="true"></span>
+      </button>
+
+      <div
+        id="guest-message-panel"
+        class="guest-message-panel"
+        [class.is-open]="isOpen()"
+        [attr.aria-hidden]="!isOpen()"
+        [attr.inert]="isOpen() ? null : ''"
+        role="region"
+        aria-labelledby="guest-message-title"
+      >
+        <div class="guest-message-panel-inner">
+          <form class="guest-message-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <div class="form-field">
+              <div class="field-heading">
+                <label for="guest-name">Tu nombre</label>
+                <span>Opcional</span>
+              </div>
+              <input
+                id="guest-name"
+                type="text"
+                formControlName="name"
+                maxlength="80"
+                autocomplete="name"
+                placeholder="Déjalo vacío para enviarlo como anónimo"
+                (input)="editAgain()"
+              />
+            </div>
+
+            <div class="form-field">
+              <div class="field-heading">
+                <label for="guest-message">Tu mensaje</label>
+                <span>{{ form.controls.message.value.length }} / {{ messageLimit }}</span>
+              </div>
+              <textarea
+                id="guest-message"
+                formControlName="message"
+                rows="6"
+                maxlength="800"
+                placeholder="Escribe aquí lo que quieras contarnos…"
+                aria-describedby="guest-message-help guest-message-error"
+                (input)="editAgain()"
+              ></textarea>
+              <small id="guest-message-help">Llegará directamente a nuestro buzón privado.</small>
+              @if (form.controls.message.touched && form.controls.message.invalid) {
+                <small id="guest-message-error" class="field-error"
+                  >Escribe un mensaje de al menos 3 caracteres.</small
+                >
+              }
+            </div>
+
+            <div class="bot-field" aria-hidden="true">
+              <label for="guest-website">No rellenar este campo</label>
+              <input
+                id="guest-website"
+                type="text"
+                formControlName="website"
+                tabindex="-1"
+                autocomplete="off"
+              />
+            </div>
+
+            <button
+              class="btn btn-primary submit-message"
+              type="submit"
+              [disabled]="status() === 'sending'"
+            >
+              @if (status() === 'sending') {
+                Enviando…
+              } @else {
+                Enviar mensaje
+              }
+            </button>
+
+            <div class="submission-feedback" aria-live="polite">
+              @if (status() === 'success') {
+                <p class="success-message">
+                  Gracias por dejarnos unas palabras. Ya las tenemos con nosotros.
+                </p>
+              } @else if (status() === 'error') {
+                <p class="error-message">
+                  No hemos podido enviarlo. Inténtalo de nuevo dentro de un momento.
+                </p>
+              }
+            </div>
+
+            <p class="privacy-note">No necesitas Telegram y no guardaremos tu mensaje en la web.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

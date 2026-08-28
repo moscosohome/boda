@@ -76,6 +76,22 @@ src/app/core/services/rsvp.service.ts
 
 Ahora mismo `submitRsvp` simula el envío y devuelve éxito con RxJS. Para conectarlo con Firebase o Supabase, sustituye el contenido de ese método por una llamada al SDK o a una API propia, manteniendo el contrato `RsvpSubmission`.
 
+## Buzón privado de Telegram
+
+La sección **Buzón de los novios** permite enviar un mensaje con nombre opcional. No usa una base de datos: la función de Cloudflare Pages situada en `functions/api/guest-message.js` valida el formulario y reenvía el contenido directamente a un grupo privado de Telegram.
+
+Configura estas variables cifradas en **Cloudflare Pages → Settings → Variables and Secrets** para los entornos de producción y preview:
+
+```text
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
+```
+
+- `TELEGRAM_BOT_TOKEN` es el token privado entregado por `@BotFather`. Nunca debe añadirse al repositorio.
+- `TELEGRAM_CHAT_ID` es el identificador del grupo privado al que se enviarán los mensajes.
+
+Después de añadir o modificar los secretos, vuelve a desplegar el proyecto. El endpoint público utilizado por Angular es `POST /api/guest-message`.
+
 ## Animaciones
 
 Las animaciones principales con GSAP ScrollTrigger están en:

@@ -77,11 +77,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
                 scrub: true,
               },
             })
-            .fromTo(
-              element,
-              { y: enterOffset },
-              { y: 0, ease: 'none', duration: 0.18 },
-            )
+            .fromTo(element, { y: enterOffset }, { y: 0, ease: 'none', duration: 0.18 })
             .to(element, { y: 0, ease: 'none', duration: visibleDuration })
             .to(element, { y: exitOffset, ease: 'none', duration: 0.18 });
         });
@@ -160,6 +156,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.countdown-part',
           '.countdown-finished',
           '.rsvp-panel',
+          '.guest-message-disclosure',
         ].join(', '),
         { skipLateSections: true, skipEventSection: true },
       );
