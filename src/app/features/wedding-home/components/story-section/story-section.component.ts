@@ -1,12 +1,9 @@
-import { Component, inject } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Component } from '@angular/core';
 
 interface StoryPhoto {
   label: string;
   caption: string;
   imageUrls?: string[];
-  instagramEmbedUrl?: SafeResourceUrl;
   instagramUrl?: string;
   alt?: string;
   currentImageIndex?: number;
@@ -20,8 +17,6 @@ interface StoryPhoto {
   styleUrl: './story-section.component.scss',
 })
 export class StorySectionComponent {
-  private readonly sanitizer = inject(DomSanitizer);
-
   protected readonly photos: StoryPhoto[] = [
     {
       label: 'Foto 01',
@@ -59,9 +54,6 @@ export class StorySectionComponent {
         'Y llegó el día. Aquella tarde de diciembre, a las siete —porque el siete siempre ha sido nuestro número—, todo salió tal y como lo había imaginado. ' +
         'Solo tú y yo, los nervios, París ante nosotros… y, de repente, la torre empezó a parpadear. ' +
         'Era nuestro momento. 4 de diciembre de 2025',
-      instagramEmbedUrl: this.sanitizer.bypassSecurityTrustResourceUrl(
-        'https://www.instagram.com/p/DTn37xeDHpo/embed/',
-      ),
       instagramUrl: 'https://www.instagram.com/p/DTn37xeDHpo/',
       imageUrls: [
         '/images/pedida-paris.webp',
@@ -90,9 +82,5 @@ export class StorySectionComponent {
     }
 
     photo.hasLoadError = true;
-  }
-
-  protected refreshScrollAnimations(): void {
-    requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 }
