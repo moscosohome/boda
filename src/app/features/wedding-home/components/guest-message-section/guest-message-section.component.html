@@ -90,22 +90,32 @@
               }
             </button>
 
-            <div class="submission-feedback" aria-live="polite">
-              @if (status() === 'success') {
-                <p class="success-message">
-                  Gracias por dejarnos unas palabras. Ya las tenemos con nosotros.
-                </p>
-              } @else if (status() === 'error') {
-                <p class="error-message">
-                  No hemos podido enviarlo. Inténtalo de nuevo dentro de un momento.
-                </p>
-              }
-            </div>
-
             <p class="privacy-note">No necesitas Telegram y no guardaremos tu mensaje en la web.</p>
           </form>
         </div>
       </div>
     </div>
   </div>
+
+  @if (status() === 'success' || status() === 'error') {
+    <div
+      class="message-toast"
+      [class.message-toast-error]="status() === 'error'"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span class="message-toast-icon" aria-hidden="true">
+        {{ status() === 'success' ? '✓' : '!' }}
+      </span>
+      <p>
+        @if (status() === 'success') {
+          Mensaje enviado correctamente. ¡Gracias por escribirnos!
+        } @else {
+          Ha ocurrido un error. Inténtalo de nuevo dentro de un momento.
+        }
+      </p>
+      <button type="button" aria-label="Cerrar aviso" (click)="dismissFeedback()">×</button>
+    </div>
+  }
 </section>

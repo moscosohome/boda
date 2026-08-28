@@ -7,15 +7,22 @@ import { GiftSectionComponent } from './components/gift-section/gift-section.com
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
 import { IntroSectionComponent } from './components/intro-section/intro-section.component';
 import { RsvpSectionComponent } from './components/rsvp-section/rsvp-section.component';
+import { SaveTheDateSectionComponent } from './components/save-the-date-section/save-the-date-section.component';
 import { StorySectionComponent } from './components/story-section/story-section.component';
 import { TimelineSectionComponent } from './components/timeline-section/timeline-section.component';
 
 @Component({
   selector: 'app-wedding-home',
   standalone: true,
+  host: {
+    '(contextmenu)': 'preventContentMenu($event)',
+    '(copy)': 'preventContentCopy($event)',
+    '(dragstart)': 'preventImageDrag($event)',
+  },
   imports: [
     HeroSectionComponent,
     IntroSectionComponent,
+    SaveTheDateSectionComponent,
     StorySectionComponent,
     TimelineSectionComponent,
     EventSectionComponent,
@@ -30,6 +37,24 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
   protected readonly showRsvpSection = false;
   private gsapContext?: gsap.Context;
   private mediaContext?: gsap.MatchMedia;
+
+  protected preventContentMenu(event: MouseEvent): void {
+    if (!this.isEditableTarget(event.target)) {
+      event.preventDefault();
+    }
+  }
+
+  protected preventContentCopy(event: ClipboardEvent): void {
+    if (!this.isEditableTarget(event.target)) {
+      event.preventDefault();
+    }
+  }
+
+  protected preventImageDrag(event: DragEvent): void {
+    if (event.target instanceof Element && event.target.closest('img')) {
+      event.preventDefault();
+    }
+  }
 
   ngAfterViewInit(): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -149,6 +174,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.section-kicker',
           '[data-animate="title"]',
           '.section-copy',
+          '.save-the-date-date',
           '.timeline-item',
           '.event-card dl > div',
           '.venue-photo img',
@@ -157,6 +183,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.countdown-finished',
           '.rsvp-panel',
           '.guest-message-disclosure',
+          '.save-the-date-video',
         ].join(', '),
         { skipLateSections: true, skipEventSection: true },
       );
@@ -228,5 +255,12 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.mediaContext?.revert();
     this.gsapContext?.revert();
+  }
+
+  private isEditableTarget(target: EventTarget | null): boolean {
+    return (
+      target instanceof Element &&
+      Boolean(target.closest('input, textarea, select, [contenteditable="true"]'))
+    );
   }
 }
