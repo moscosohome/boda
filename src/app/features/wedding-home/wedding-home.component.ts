@@ -38,6 +38,8 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
   private gsapContext?: gsap.Context;
   private mediaContext?: gsap.MatchMedia;
   private refreshFrame?: number;
+  private layoutObserver?: ResizeObserver;
+  private refreshTimer?: number;
 
   protected preventContentMenu(event: MouseEvent): void {
     if (!this.isEditableTarget(event.target)) {
@@ -71,14 +73,18 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
       const animateScrollLifecycle = (
         selector: string,
         options: {
-          end?: string;
-          visibleDuration?: number;
+          enterStart?: string;
+          enterEnd?: string;
+          exitStart?: string;
+          exitEnd?: string;
           skipLateSections?: boolean;
           skipEventSection?: boolean;
         } = {},
       ): void => {
-        const end = options.end ?? 'top -12%';
-        const visibleDuration = options.visibleDuration ?? 0.64;
+        const enterStart = options.enterStart ?? 'top 96%';
+        const enterEnd = options.enterEnd ?? 'top 72%';
+        const exitStart = options.exitStart ?? 'bottom 15%';
+        const exitEnd = options.exitEnd ?? 'bottom -8%';
 
         gsap.utils.toArray<HTMLElement>(selector).forEach((element) => {
           if (options.skipEventSection && element.closest('.event-section')) {
@@ -94,40 +100,40 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
             return;
           }
 
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: element,
-                start: 'top 88%',
-                end,
-                scrub: true,
-              },
-            })
-            .fromTo(
-              element,
-              { y: enterOffset, autoAlpha: 0, filter: 'blur(8px)' },
-              {
-                y: 0,
-                autoAlpha: 1,
-                filter: 'blur(0px)',
-                ease: 'none',
-                duration: 0.18,
-              },
-            )
-            .to(element, {
+          gsap.fromTo(
+            element,
+            { y: enterOffset, autoAlpha: 0, filter: 'blur(8px)' },
+            {
               y: 0,
               autoAlpha: 1,
               filter: 'blur(0px)',
               ease: 'none',
-              duration: visibleDuration,
-            })
-            .to(element, {
+              scrollTrigger: {
+                trigger: element,
+                start: enterStart,
+                end: enterEnd,
+                scrub: true,
+              },
+            },
+          );
+
+          gsap.fromTo(
+            element,
+            { y: 0, autoAlpha: 1, filter: 'blur(0px)' },
+            {
               y: exitOffset,
               autoAlpha: 0,
               filter: 'blur(8px)',
+              immediateRender: false,
               ease: 'none',
-              duration: 0.18,
-            });
+              scrollTrigger: {
+                trigger: element,
+                start: exitStart,
+                end: exitEnd,
+                scrub: true,
+              },
+            },
+          );
         });
       };
 
@@ -167,8 +173,8 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           ease: 'none',
           scrollTrigger: {
             trigger,
-            start: 'bottom 62%',
-            end: 'bottom 18%',
+            start: 'bottom 15%',
+            end: 'bottom -8%',
             scrub: true,
           },
         });
@@ -209,16 +215,12 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.countdown-part',
           '.countdown-finished',
           '.rsvp-panel',
-          '.guest-message-disclosure',
           '.save-the-date-video',
         ].join(', '),
         { skipLateSections: true, skipEventSection: true },
       );
 
-      animateScrollLifecycle('.photo-reveal', {
-        end: 'bottom 12%',
-        visibleDuration: 0.68,
-      });
+      animateScrollLifecycle('.photo-reveal');
 
       animateScrollEnterOnly(
         [
@@ -236,11 +238,10 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
       animateSectionExit('.event-section', '.event-copy, .event-card');
 
       animateScrollLifecycle(
-        ['.faq-section .section-kicker', '.faq-section [data-animate="title"]', '.faq-item'].join(
-          ', ',
-        ),
-        { end: 'top -12%', visibleDuration: 0.76 },
+        ['.faq-section .section-kicker', '.faq-section [data-animate="title"]'].join(', '),
       );
+
+      animateScrollLifecycle('.faq-item');
 
       animateScrollEnterOnly(
         [
@@ -252,7 +253,10 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         { start: 'top 100%', end: 'top 55%' },
       );
 
-      animateScrollEnterOnly('footer p, footer span');
+      animateScrollEnterOnly('.guest-message-disclosure', {
+        start: 'top 96%',
+        end: 'top 72%',
+      });
 
       gsap.from('.timeline-line-fill', {
         scaleY: 0,
@@ -306,9 +310,9 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         if (image) {
           gsap.fromTo(
             image,
-            { scale: 1.065, yPercent: 2.5 },
+            { scale: 1.1, yPercent: 2.5 },
             {
-              scale: 1,
+              scale: 1.055,
               yPercent: -2.5,
               ease: 'none',
               scrollTrigger: {
@@ -355,12 +359,30 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
     });
 
     this.refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+
+    this.layoutObserver = new ResizeObserver(() => {
+      if (this.refreshTimer !== undefined) {
+        window.clearTimeout(this.refreshTimer);
+      }
+
+      this.refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 120);
+    });
+
+    const layoutTargets = window.matchMedia('(max-width: 899px)').matches
+      ? document.querySelectorAll<HTMLElement>('main')
+      : document.querySelectorAll<HTMLElement>('.guest-message-panel, app-faq-accordion');
+
+    layoutTargets.forEach((element) => this.layoutObserver?.observe(element));
   }
 
   ngOnDestroy(): void {
     if (this.refreshFrame !== undefined) {
       window.cancelAnimationFrame(this.refreshFrame);
     }
+    if (this.refreshTimer !== undefined) {
+      window.clearTimeout(this.refreshTimer);
+    }
+    this.layoutObserver?.disconnect();
     this.mediaContext?.revert();
     this.gsapContext?.revert();
   }
