@@ -37,6 +37,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
   protected readonly showRsvpSection = false;
   private gsapContext?: gsap.Context;
   private mediaContext?: gsap.MatchMedia;
+  private refreshFrame?: number;
 
   protected preventContentMenu(event: MouseEvent): void {
     if (!this.isEditableTarget(event.target)) {
@@ -102,9 +103,31 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
                 scrub: true,
               },
             })
-            .fromTo(element, { y: enterOffset }, { y: 0, ease: 'none', duration: 0.18 })
-            .to(element, { y: 0, ease: 'none', duration: visibleDuration })
-            .to(element, { y: exitOffset, ease: 'none', duration: 0.18 });
+            .fromTo(
+              element,
+              { y: enterOffset, autoAlpha: 0, filter: 'blur(8px)' },
+              {
+                y: 0,
+                autoAlpha: 1,
+                filter: 'blur(0px)',
+                ease: 'none',
+                duration: 0.18,
+              },
+            )
+            .to(element, {
+              y: 0,
+              autoAlpha: 1,
+              filter: 'blur(0px)',
+              ease: 'none',
+              duration: visibleDuration,
+            })
+            .to(element, {
+              y: exitOffset,
+              autoAlpha: 0,
+              filter: 'blur(8px)',
+              ease: 'none',
+              duration: 0.18,
+            });
         });
       };
 
@@ -118,9 +141,11 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         gsap.utils.toArray<HTMLElement>(selector).forEach((element) => {
           gsap.fromTo(
             element,
-            { y: enterOffset },
+            { y: enterOffset, autoAlpha: 0, filter: 'blur(8px)' },
             {
               y: 0,
+              autoAlpha: 1,
+              filter: 'blur(0px)',
               ease: 'none',
               scrollTrigger: {
                 trigger: element,
@@ -136,6 +161,8 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
       const animateSectionExit = (trigger: string, selector: string): void => {
         gsap.to(selector, {
           y: exitOffset,
+          autoAlpha: 0,
+          filter: 'blur(8px)',
           stagger: 0.05,
           ease: 'none',
           scrollTrigger: {
@@ -241,6 +268,82 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
     });
 
     this.mediaContext = gsap.matchMedia();
+    this.mediaContext.add('(max-width: 859px)', () => {
+      gsap.utils.toArray<HTMLElement>('.photo-reveal').forEach((figure, index) => {
+        const frame = figure.querySelector<HTMLElement>('.photo-frame');
+
+        if (!frame) {
+          return;
+        }
+
+        const image = frame.querySelector<HTMLImageElement>('img');
+        const captionTargets = Array.from(
+          figure.querySelectorAll<HTMLElement>('figcaption, .proposal-video-link'),
+        );
+
+        gsap.fromTo(
+          frame,
+          {
+            clipPath: 'inset(100% 0% 0% 0% round 0.75rem)',
+            rotate: index % 2 === 0 ? -0.65 : 0.65,
+            scale: 0.965,
+          },
+          {
+            clipPath: 'inset(0% 0% 0% 0% round 0.75rem)',
+            rotate: 0,
+            scale: 1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: frame,
+              start: 'top 96%',
+              end: 'top 54%',
+              scrub: 0.7,
+              invalidateOnRefresh: true,
+            },
+          },
+        );
+
+        if (image) {
+          gsap.fromTo(
+            image,
+            { scale: 1.065, yPercent: 2.5 },
+            {
+              scale: 1,
+              yPercent: -2.5,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: frame,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 0.65,
+                invalidateOnRefresh: true,
+              },
+            },
+          );
+        }
+
+        if (captionTargets.length) {
+          gsap.fromTo(
+            captionTargets,
+            { autoAlpha: 0, y: 18 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              stagger: 0.08,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: frame,
+                start: 'top 64%',
+                end: 'top 43%',
+                scrub: 0.45,
+                invalidateOnRefresh: true,
+              },
+            },
+          );
+        }
+      });
+    });
+
     this.mediaContext.add('(min-width: 900px)', () => {
       ScrollTrigger.create({
         trigger: '.event-section',
@@ -250,9 +353,14 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         pinSpacing: true,
       });
     });
+
+    this.refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 
   ngOnDestroy(): void {
+    if (this.refreshFrame !== undefined) {
+      window.cancelAnimationFrame(this.refreshFrame);
+    }
     this.mediaContext?.revert();
     this.gsapContext?.revert();
   }

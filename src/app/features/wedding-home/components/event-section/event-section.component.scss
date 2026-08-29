@@ -54,6 +54,13 @@ dd {
   object-fit: contain;
 }
 
+@media (max-width: 899px) {
+  .event-section {
+    min-height: auto;
+    padding: 3.5rem 0;
+  }
+}
+
 @media (min-width: 900px) {
   .event-grid {
     grid-template-columns: 0.95fr 1.05fr;

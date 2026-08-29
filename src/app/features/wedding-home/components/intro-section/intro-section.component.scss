@@ -19,3 +19,9 @@
 .intro-line + .intro-line {
   margin-top: 0.25rem;
 }
+
+@media (max-width: 859px) {
+  .intro-section {
+    padding: 4.5rem 0 3rem;
+  }
+}

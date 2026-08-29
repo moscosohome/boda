@@ -21,3 +21,9 @@ span {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+
+@media (max-width: 599px) {
+  footer {
+    padding-block: 2.5rem;
+  }
+}

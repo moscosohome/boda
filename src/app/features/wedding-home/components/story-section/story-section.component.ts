@@ -26,7 +26,7 @@ export class StorySectionComponent {
     },
     {
       label: 'Foto 02',
-      caption: 'Dos jovenés allá por 2015',
+      caption: 'Dos jóvenes allá por 2015.',
       imageUrls: ['/images/segunda_foto.png'],
       alt: 'Retrato en acuarela de Cristina & Antonio abrazados',
     },
@@ -52,7 +52,7 @@ export class StorySectionComponent {
       label: 'Foto 06',
       caption:
         'Y llegó el día. Aquella tarde de diciembre, a las siete —porque el siete siempre ha sido nuestro número—, todo salió tal y como lo había imaginado. ' +
-        'Solo tú y yo, los nervios, París ante nosotros… y, de repente, la torre empezó a parpadear. ' +
+        'Solo tú y yo, los nervios, París ante nosotros… y, de repente, la Torre empezó a parpadear. ' +
         'Era nuestro momento. 4 de diciembre de 2025',
       instagramUrl: 'https://www.instagram.com/p/DTn37xeDHpo/',
       imageUrls: [

@@ -29,11 +29,7 @@ figure {
   border-radius: var(--radius-md);
   background:
     linear-gradient(145deg, rgba(193, 126, 130, 0.18), rgba(255, 250, 242, 0.86)),
-    repeating-linear-gradient(
-      135deg,
-      rgba(181, 154, 103, 0.12) 0 1px,
-      transparent 1px 18px
-    );
+    repeating-linear-gradient(135deg, rgba(181, 154, 103, 0.12) 0 1px, transparent 1px 18px);
   color: rgba(94, 90, 82, 0.58);
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -135,6 +131,25 @@ figcaption {
   stroke-width: 1.5;
 }
 
+@media (max-width: 859px) and (prefers-reduced-motion: no-preference) {
+  .photo-frame {
+    backface-visibility: hidden;
+    transform-origin: center bottom;
+    will-change: clip-path, transform;
+  }
+
+  .photo-frame img {
+    backface-visibility: hidden;
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  figcaption,
+  .proposal-video-link {
+    will-change: opacity, transform;
+  }
+}
+
 @media (min-width: 860px) {
   .story-grid {
     grid-template-columns: 0.82fr 1.18fr;
@@ -151,5 +166,15 @@ figcaption {
 
   .photo-grid .photo-reveal:nth-child(3) {
     width: 82%;
+  }
+}
+
+@media (max-width: 859px) {
+  .story-section {
+    padding: 4.5rem 0 3.5rem;
+  }
+
+  .story-grid {
+    gap: 2.25rem;
   }
 }

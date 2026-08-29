@@ -68,6 +68,18 @@
 }
 
 @media (max-width: 599px) {
+  .faq-section {
+    padding: 3.5rem 0 2.5rem;
+  }
+
+  .gift-section {
+    padding: 2rem 0 0;
+  }
+
+  .gift-card {
+    padding-block: 2.5rem;
+  }
+
   .whatsapp-actions,
   .whatsapp-btn {
     width: 100%;

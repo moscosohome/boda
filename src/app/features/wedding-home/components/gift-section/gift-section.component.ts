@@ -24,16 +24,16 @@ export class GiftSectionComponent {
     },
     {
       question: '¿Hay aparcamiento?',
-      answer: '¡Si! Hay más de 50 plazas y en los alrededores también se puede aparcar facilmente.',
+      answer: '¡Sí! Hay más de 50 plazas y en los alrededores también se puede aparcar fácilmente.',
     },
     {
-      question: '¿Que precio tiene el cubierto?',
+      question: '¿Qué precio tiene el cubierto?',
       answer:
-        'No lo sabemos todavía, tenemos que decidir aún el menú. Te informaremos cuando te demos la invitación y además lo indicaremos por aquí',
+        'Todavía no lo sabemos, ya que aún tenemos que decidir el menú. Te informaremos cuando te demos la invitación y también lo indicaremos por aquí.',
     },
     {
       question: '¿Puedo llevar acompañante?',
-      answer: 'Confírmalo en el formulario para que podamos organizar bien los espacios.',
+      answer: 'Consúltanoslo antes de confirmar para que podamos organizar bien los espacios.',
     },
     {
       question: '¿Debo confirmar asistencia?',
