@@ -39,6 +39,10 @@ export class GuestMessageSectionComponent implements OnDestroy {
     });
   }
 
+  protected closeMessageForm(): void {
+    this.isOpen.set(false);
+  }
+
   protected async submit(): Promise<void> {
     if (this.form.invalid || this.status() === 'sending') {
       this.form.markAllAsTouched();

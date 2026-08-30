@@ -15,7 +15,15 @@
           </span>
           <span class="guest-message-hint">Puedes firmarlo o enviarlo de forma anónima.</span>
         </span>
-        <span class="disclosure-icon" aria-hidden="true"></span>
+        <span class="disclosure-action" aria-hidden="true">
+          <svg class="disclosure-envelope" viewBox="0 0 24 24">
+            <path d="M3.5 6.5h17v11h-17v-11Zm.8.7 7.7 6 7.7-6M4.3 16.8l5.4-5m10 5-5.4-5" />
+          </svg>
+          <span>Escribir mensaje</span>
+          <svg class="disclosure-chevron" viewBox="0 0 24 24">
+            <path d="m8 10 4 4 4-4" />
+          </svg>
+        </span>
       </button>
 
       <div
@@ -88,6 +96,10 @@
               } @else {
                 Enviar mensaje
               }
+            </button>
+
+            <button class="btn cancel-message" type="button" (click)="closeMessageForm()">
+              Cancelar
             </button>
 
             <p class="privacy-note">

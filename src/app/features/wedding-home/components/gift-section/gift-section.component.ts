@@ -35,11 +35,11 @@ export class GiftSectionComponent {
       question: '¿Puedo llevar acompañante?',
       answer: 'Consúltanoslo antes de confirmar para que podamos organizar bien los espacios.',
     },
-    {
-      question: '¿Debo confirmar asistencia?',
-      answer:
-        'Sí. Para confirmar tu asistencia, envíanos el justificante de pago por WhatsApp a Antonio o a Cristina.',
-    },
+    // {
+    //   question: '¿Debo confirmar asistencia?',
+    //   answer:
+    //     'Sí. Para confirmar tu asistencia, envíanos el justificante de pago por WhatsApp a Antonio o a Cristina.',
+    // },
     {
       question: '¿Hay alguna indicación sobre vestimenta?',
       answer: 'Más adelante añadiremos cualquier detalle útil sobre vestimenta o clima.',

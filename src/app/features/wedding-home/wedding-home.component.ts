@@ -180,13 +180,77 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         });
       };
 
-      gsap
+      const heroEntrance = gsap
+        .timeline({ defaults: { ease: 'power3.out' } })
+        .fromTo(
+          '.hero-photo-placeholder',
+          { scale: 1.18 },
+          { scale: 1.08, duration: 2.1, ease: 'power2.out' },
+          0,
+        )
+        .fromTo(
+          '.hero-topline > *',
+          { y: -18, autoAlpha: 0, filter: 'blur(6px)' },
+          {
+            y: 0,
+            autoAlpha: 1,
+            filter: 'blur(0px)',
+            duration: 0.7,
+            stagger: 0.12,
+          },
+          0.12,
+        )
+        .fromTo(
+          '.hero-kicker',
+          { y: 22, autoAlpha: 0, filter: 'blur(8px)' },
+          { y: 0, autoAlpha: 1, filter: 'blur(0px)', duration: 0.72 },
+          0.3,
+        )
+        .fromTo(
+          '#hero-title',
+          { y: 46, autoAlpha: 0, filter: 'blur(16px)', scale: 0.96 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            filter: 'blur(0px)',
+            scale: 1,
+            duration: 1.05,
+          },
+          0.42,
+        )
+        .fromTo(
+          '.hero-names',
+          { y: 28, autoAlpha: 0, filter: 'blur(10px)' },
+          { y: 0, autoAlpha: 1, filter: 'blur(0px)', duration: 0.82 },
+          0.72,
+        )
+        .fromTo(
+          '.hero-details div',
+          { y: 24, autoAlpha: 0, filter: 'blur(8px)' },
+          {
+            y: 0,
+            autoAlpha: 1,
+            filter: 'blur(0px)',
+            duration: 0.64,
+            stagger: 0.11,
+          },
+          0.94,
+        )
+        .fromTo(
+          '.scroll-cue',
+          { y: 18, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.55, ease: 'power2.out' },
+          1.45,
+        );
+
+      const heroExit = gsap
         .timeline({
           scrollTrigger: {
             trigger: '.hero-section',
             start: 'top top',
             end: '+=430',
             scrub: 0.85,
+            invalidateOnRefresh: true,
           },
         })
         .to('.hero-photo-placeholder', { scale: 1.13, yPercent: 3, ease: 'none' }, 0)
@@ -195,11 +259,18 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           {
             y: exitOffset,
             autoAlpha: 0,
+            filter: 'blur(8px)',
             stagger: 0.055,
             ease: 'none',
           },
           0,
         );
+
+      heroExit.scrollTrigger?.disable(false, true);
+      heroEntrance.eventCallback('onComplete', () => {
+        heroExit.scrollTrigger?.enable();
+        ScrollTrigger.refresh();
+      });
 
       animateScrollLifecycle(
         [
@@ -248,7 +319,6 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           '.gift-card .section-kicker',
           '.gift-card [data-animate="title"]',
           '.gift-card .section-copy',
-          '.gift-card .whatsapp-confirmation',
         ].join(', '),
         { start: 'top 100%', end: 'top 55%' },
       );

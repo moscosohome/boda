@@ -156,7 +156,6 @@ dd {
   background: rgba(255, 250, 242, 0.28);
   transform: translateX(-50%);
   z-index: 3;
-  animation: hero-rise 1s ease 540ms both;
 }
 
 .scroll-cue-line {
@@ -178,18 +177,6 @@ dd {
   background: var(--color-ivory);
   transform: translate(-50%, 0);
   animation: scroll-dot 1.8s ease-in-out infinite;
-}
-
-@keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(1.1rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @keyframes scroll-dot {
