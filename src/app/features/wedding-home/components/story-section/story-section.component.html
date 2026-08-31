@@ -10,47 +10,78 @@
         una llamada… y aquel septiembre empezó nuestra historia.
       </p>
     </div>
-    <div class="photo-grid" aria-label="Espacios reservados para fotos de Cristina & Antonio">
-      @for (photo of photos; track photo.label) {
-        <figure class="photo-reveal">
-          <div class="photo-frame" [class.has-image]="getImageUrl(photo) && !photo.hasLoadError">
-            @if (getImageUrl(photo); as imageUrl) {
-              <img
-                [src]="imageUrl"
-                [alt]="photo.alt"
-                loading="lazy"
-                (error)="markImageAsUnavailable(photo)"
-              />
-            } @else {
-              <span>{{ photo.label }}</span>
-            }
-          </div>
-          <figcaption>{{ photo.caption }}</figcaption>
+    <div class="story-gallery">
+      <swiper-container
+        class="story-swiper"
+        effect="cards"
+        grab-cursor="true"
+        pagination="true"
+        pagination-clickable="true"
+        a11y="true"
+        edge-swipe-detection="true"
+        cards-effect-per-slide-offset="9"
+        cards-effect-per-slide-rotate="1.25"
+        cards-effect-rotate="true"
+        cards-effect-slide-shadows="false"
+        aria-label="Galería de la historia de Cristina y Antonio"
+      >
+        @for (photo of photos; track photo.label) {
+          <swiper-slide>
+            <figure class="story-card">
+              <div class="photo-frame" [class.has-image]="getImageUrl(photo) && !photo.hasLoadError">
+                @if (getImageUrl(photo); as imageUrl) {
+                  <img
+                    [src]="imageUrl"
+                    [alt]="photo.alt"
+                    loading="lazy"
+                    (error)="markImageAsUnavailable(photo)"
+                  />
+                } @else {
+                  <span>{{ photo.label }}</span>
+                }
 
-          @if (photo.instagramUrl) {
-            <a
-              class="proposal-video-link"
-              [href]="photo.instagramUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Ver el vídeo de la pedida en Instagram"
-            >
-              <span class="proposal-video-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="m9.5 7 7 5-7 5V7Z" />
-                </svg>
-              </span>
-              <span class="proposal-video-copy">
-                <strong>¿Quieres ver cómo fue la pedida?</strong>
-                <small>Ver en Instagram</small>
-              </span>
-              <svg class="proposal-video-arrow" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12h14m-5-5 5 5-5 5" />
-              </svg>
-            </a>
-          }
-        </figure>
-      }
+                <span class="photo-moment">{{ photo.moment }}</span>
+              </div>
+
+              @if (photo.caption) {
+                <figcaption>
+                  <span class="caption-rule" aria-hidden="true"></span>
+                  <span>{{ photo.caption }}</span>
+                </figcaption>
+              }
+
+            </figure>
+          </swiper-slide>
+        }
+      </swiper-container>
+
+      <p class="swipe-hint">
+        <span>Desliza para recorrer nuestra historia</span>
+        <svg viewBox="0 0 32 16" aria-hidden="true">
+          <path d="M2 8h27m-6-6 6 6-6 6" />
+        </svg>
+      </p>
+
+      <a
+        class="proposal-video-link"
+        [href]="proposalInstagramUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Ver el vídeo de la pedida en Instagram"
+      >
+        <span class="proposal-video-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="m9.5 7 7 5-7 5V7Z" />
+          </svg>
+        </span>
+        <span class="proposal-video-copy">
+          <small>La pedida en París</small>
+          <strong>Ver el vídeo de aquel momento</strong>
+        </span>
+        <svg class="proposal-video-arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14m-5-5 5 5-5 5" />
+        </svg>
+      </a>
     </div>
   </div>
 </section>

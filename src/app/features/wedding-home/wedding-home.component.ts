@@ -291,7 +291,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
         { skipLateSections: true, skipEventSection: true },
       );
 
-      animateScrollLifecycle('.photo-reveal');
+      animateScrollLifecycle('.story-gallery');
 
       animateScrollEnterOnly(
         [
@@ -342,81 +342,6 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
     });
 
     this.mediaContext = gsap.matchMedia();
-    this.mediaContext.add('(max-width: 859px)', () => {
-      gsap.utils.toArray<HTMLElement>('.photo-reveal').forEach((figure, index) => {
-        const frame = figure.querySelector<HTMLElement>('.photo-frame');
-
-        if (!frame) {
-          return;
-        }
-
-        const image = frame.querySelector<HTMLImageElement>('img');
-        const captionTargets = Array.from(
-          figure.querySelectorAll<HTMLElement>('figcaption, .proposal-video-link'),
-        );
-
-        gsap.fromTo(
-          frame,
-          {
-            clipPath: 'inset(100% 0% 0% 0% round 0.75rem)',
-            rotate: index % 2 === 0 ? -0.65 : 0.65,
-            scale: 0.965,
-          },
-          {
-            clipPath: 'inset(0% 0% 0% 0% round 0.75rem)',
-            rotate: 0,
-            scale: 1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: frame,
-              start: 'top 96%',
-              end: 'top 54%',
-              scrub: 0.7,
-              invalidateOnRefresh: true,
-            },
-          },
-        );
-
-        if (image) {
-          gsap.fromTo(
-            image,
-            { scale: 1.1, yPercent: 2.5 },
-            {
-              scale: 1.055,
-              yPercent: -2.5,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: frame,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 0.65,
-                invalidateOnRefresh: true,
-              },
-            },
-          );
-        }
-
-        if (captionTargets.length) {
-          gsap.fromTo(
-            captionTargets,
-            { autoAlpha: 0, y: 18 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              stagger: 0.08,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: frame,
-                start: 'top 64%',
-                end: 'top 43%',
-                scrub: 0.45,
-                invalidateOnRefresh: true,
-              },
-            },
-          );
-        }
-      });
-    });
 
     this.mediaContext.add('(min-width: 900px)', () => {
       ScrollTrigger.create({
