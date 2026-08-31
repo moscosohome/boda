@@ -24,6 +24,7 @@
         cards-effect-rotate="true"
         cards-effect-slide-shadows="false"
         aria-label="Galería de la historia de Cristina y Antonio"
+        (pointerdown)="dismissSwipeCue()"
       >
         @for (photo of photos; track photo.label) {
           <swiper-slide>

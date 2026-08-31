@@ -14,11 +14,6 @@ import { TimelineSectionComponent } from './components/timeline-section/timeline
 @Component({
   selector: 'app-wedding-home',
   standalone: true,
-  host: {
-    '(contextmenu)': 'preventContentMenu($event)',
-    '(copy)': 'preventContentCopy($event)',
-    '(dragstart)': 'preventImageDrag($event)',
-  },
   imports: [
     HeroSectionComponent,
     IntroSectionComponent,
@@ -40,24 +35,6 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
   private refreshFrame?: number;
   private layoutObserver?: ResizeObserver;
   private refreshTimer?: number;
-
-  protected preventContentMenu(event: MouseEvent): void {
-    if (!this.isEditableTarget(event.target)) {
-      event.preventDefault();
-    }
-  }
-
-  protected preventContentCopy(event: ClipboardEvent): void {
-    if (!this.isEditableTarget(event.target)) {
-      event.preventDefault();
-    }
-  }
-
-  protected preventImageDrag(event: DragEvent): void {
-    if (event.target instanceof Element && event.target.closest('img')) {
-      event.preventDefault();
-    }
-  }
 
   ngAfterViewInit(): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -380,12 +357,5 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
     this.layoutObserver?.disconnect();
     this.mediaContext?.revert();
     this.gsapContext?.revert();
-  }
-
-  private isEditableTarget(target: EventTarget | null): boolean {
-    return (
-      target instanceof Element &&
-      Boolean(target.closest('input, textarea, select, [contenteditable="true"]'))
-    );
   }
 }

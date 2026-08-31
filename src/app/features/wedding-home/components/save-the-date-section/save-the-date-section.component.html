@@ -42,7 +42,7 @@
         </span>
         <span class="poster-ornament poster-ornament-bottom" aria-hidden="true"></span>
       </button>
-      <p class="video-caption">Cristina & Antonio · Nos casamos</p>
+      <p class="video-caption">Cristina & Antonio</p>
     </div>
   </div>
 
@@ -60,14 +60,11 @@
             [src]="videoUrl"
             aria-label="Save the Date de Cristina y Antonio"
             controls
-            controlsList="nodownload noremoteplayback"
-            disablePictureInPicture
             playsinline
             autoplay
             preload="metadata"
             (canplay)="videoReady()"
             (error)="videoFailed()"
-            (contextmenu)="$event.preventDefault()"
           ></video>
 
           @if (isLoading()) {

@@ -1,10 +1,27 @@
 .intro-section {
   position: relative;
   z-index: 2;
+  overflow: hidden;
   padding: clamp(5.5rem, 14vw, 9rem) 0 clamp(6rem, 18vw, 13rem);
 }
 
+.intro-section::after {
+  position: absolute;
+  right: clamp(-5rem, -10vw, -2rem);
+  bottom: -1.5rem;
+  width: min(19rem, 58vw);
+  aspect-ratio: 789 / 557;
+  background: url('/images/logosololetras.png') center / contain no-repeat;
+  content: '';
+  filter: sepia(0.35);
+  opacity: 0.035;
+  pointer-events: none;
+  transform: rotate(-6deg);
+}
+
 .section-shell {
+  position: relative;
+  z-index: 1;
   max-width: 920px;
 }
 

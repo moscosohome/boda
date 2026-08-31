@@ -1,4 +1,11 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ElementRef,
+  OnDestroy,
+  inject,
+} from '@angular/core';
 import { register } from 'swiper/element/bundle';
 
 if (typeof customElements !== 'undefined' && !customElements.get('swiper-container')) {
@@ -15,6 +22,14 @@ interface StoryPhoto {
   hasLoadError?: boolean;
 }
 
+interface StorySwiperElement extends HTMLElement {
+  swiper?: {
+    activeIndex: number;
+    destroyed: boolean;
+    setProgress: (progress: number, speed?: number) => void;
+  };
+}
+
 @Component({
   selector: 'app-story-section',
   standalone: true,
@@ -22,7 +37,12 @@ interface StoryPhoto {
   styleUrl: './story-section.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class StorySectionComponent {
+export class StorySectionComponent implements AfterViewInit, OnDestroy {
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private swipeCueObserver?: IntersectionObserver;
+  private swipeCueStartTimer?: number;
+  private swipeCueReturnTimer?: number;
+  private swipeCueDismissed = false;
   protected readonly proposalInstagramUrl = 'https://www.instagram.com/p/DTn37xeDHpo/';
   protected readonly photos: StoryPhoto[] = [
     {
@@ -72,6 +92,63 @@ export class StorySectionComponent {
       alt: 'La pedida de Cristina & Antonio frente a la Torre Eiffel',
     },
   ];
+
+  ngAfterViewInit(): void {
+    const swiper =
+      this.elementRef.nativeElement.querySelector<StorySwiperElement>('.story-swiper');
+
+    if (!swiper || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
+    this.swipeCueObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || entry.intersectionRatio < 0.45) {
+          return;
+        }
+
+        this.playSwipeCue(swiper);
+        this.swipeCueObserver?.disconnect();
+      },
+      { threshold: [0.45] },
+    );
+
+    this.swipeCueObserver.observe(swiper);
+  }
+
+  ngOnDestroy(): void {
+    this.swipeCueObserver?.disconnect();
+    window.clearTimeout(this.swipeCueStartTimer);
+    window.clearTimeout(this.swipeCueReturnTimer);
+  }
+
+  protected dismissSwipeCue(): void {
+    this.swipeCueDismissed = true;
+    window.clearTimeout(this.swipeCueStartTimer);
+    window.clearTimeout(this.swipeCueReturnTimer);
+  }
+
+  private playSwipeCue(swiperElement: StorySwiperElement): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    this.swipeCueStartTimer = window.setTimeout(() => {
+      const swiper = swiperElement.swiper;
+
+      if (this.swipeCueDismissed || !swiper || swiper.destroyed || swiper.activeIndex !== 0) {
+        return;
+      }
+
+      swiper.setProgress(0.03, 420);
+
+      this.swipeCueReturnTimer = window.setTimeout(() => {
+        if (!this.swipeCueDismissed && !swiper.destroyed && swiper.activeIndex === 0) {
+          swiper.setProgress(0, 560);
+        }
+      }, 520);
+    }, 650);
+  }
 
   protected getImageUrl(photo: StoryPhoto): string | null {
     if (photo.hasLoadError) {

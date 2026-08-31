@@ -5,4 +5,37 @@
 
 main {
   position: relative;
+  isolation: isolate;
+}
+
+main::before,
+main::after {
+  position: absolute;
+  z-index: 0;
+  width: min(38rem, 82vw);
+  border-radius: 48% 52% 61% 39% / 44% 38% 62% 56%;
+  aspect-ratio: 1;
+  content: '';
+  filter: blur(1.75rem);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+main::before {
+  top: 118svh;
+  right: -34vw;
+  background: radial-gradient(circle at 42% 45%, rgba(230, 184, 183, 0.52), transparent 68%);
+  transform: rotate(18deg);
+}
+
+main::after {
+  top: 56%;
+  left: -39vw;
+  background: radial-gradient(circle at 58% 48%, rgba(216, 197, 155, 0.42), transparent 68%);
+  transform: rotate(-14deg);
+}
+
+main > * {
+  position: relative;
+  z-index: 1;
 }

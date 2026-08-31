@@ -21,6 +21,7 @@
 }
 
 .hero-photo-placeholder {
+  overflow: hidden;
   background:
     linear-gradient(135deg, rgba(91, 58, 66, 0.62), rgba(250, 245, 243, 0.08)),
     radial-gradient(circle at 52% 32%, rgba(230, 184, 183, 0.32), transparent 22rem),
@@ -31,6 +32,19 @@
       var(--color-blush)
     );
   transform: scale(1.08);
+}
+
+.hero-photo-placeholder::before {
+  position: absolute;
+  inset: -22%;
+  background:
+    radial-gradient(circle at 32% 38%, rgba(255, 250, 242, 0.24), transparent 26%),
+    radial-gradient(circle at 72% 62%, rgba(230, 184, 183, 0.22), transparent 32%);
+  content: '';
+  mix-blend-mode: screen;
+  opacity: 0.75;
+  transform: translate3d(-3%, -2%, 0) scale(1.02);
+  animation: hero-light-drift 13s ease-in-out infinite alternate;
 }
 
 .hero-media::after {
@@ -189,6 +203,16 @@ dd {
   50% {
     transform: translate(-50%, 1.7rem);
     opacity: 1;
+  }
+}
+
+@keyframes hero-light-drift {
+  from {
+    transform: translate3d(-3%, -2%, 0) scale(1.02);
+  }
+
+  to {
+    transform: translate3d(4%, 3%, 0) scale(1.08);
   }
 }
 
