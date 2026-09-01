@@ -24,13 +24,29 @@ interface StoryPhoto {
   hasLoadError?: boolean;
 }
 
-interface StorySwiperElement extends HTMLElement {
-  swiper?: {
-    activeIndex: number;
-    destroyed: boolean;
-    progress: number;
-    setProgress: (progress: number, speed?: number) => void;
+interface StorySwiperInstance {
+  activeIndex: number;
+  destroyed: boolean;
+  progress: number;
+  size: number;
+  translate: number;
+  touchEventsData: {
+    currentTranslate?: number;
+    isTouched: boolean;
+    startTranslate?: number;
   };
+  maxTranslate: () => number;
+  minTranslate: () => number;
+  setTransition: (duration: number) => void;
+  setTranslate: (translate: number) => void;
+  slideTo: (index: number, speed?: number, runCallbacks?: boolean) => boolean;
+  updateActiveIndex: () => void;
+  updateProgress: (translate?: number) => void;
+  updateSlidesClasses: () => void;
+}
+
+interface StorySwiperElement extends HTMLElement {
+  swiper?: StorySwiperInstance;
 }
 
 @Component({
@@ -48,8 +64,11 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
   private swipeCueObserver?: IntersectionObserver;
   private swipeCueStartTimer?: number;
   private swipeCueReturnTimer?: number;
+  private swipeCueAnimationFrame?: number;
   private swipeCueDismissed = false;
   private swipeCueArmed = true;
+  private activeCueSwiper?: StorySwiperInstance;
+  private activeCueOrigin?: number;
   private readonly cancelSwipeCueOnInteraction = (): void => {
     this.swipeCueDismissed = true;
     this.cancelSwipeCue();
@@ -115,7 +134,10 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
     this.swiperElement = swiper;
 
     this.ngZone.runOutsideAngular(() => {
-      swiper.addEventListener('pointerdown', this.cancelSwipeCueOnInteraction, { passive: true });
+      swiper.addEventListener('pointerdown', this.cancelSwipeCueOnInteraction, {
+        capture: true,
+        passive: true,
+      });
 
       this.swipeCueObserver = new IntersectionObserver(
         ([entry]) => {
@@ -124,7 +146,7 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
           }
 
           if (!entry.isIntersecting || entry.intersectionRatio <= 0.08) {
-            this.cancelSwipeCue();
+            this.cancelSwipeCue(true);
             this.swipeCueDismissed = false;
             this.swipeCueArmed = true;
             return;
@@ -147,9 +169,10 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.swipeCueObserver?.disconnect();
-    this.swiperElement?.removeEventListener('pointerdown', this.cancelSwipeCueOnInteraction);
+    this.swiperElement?.removeEventListener('pointerdown', this.cancelSwipeCueOnInteraction, true);
     window.clearTimeout(this.swipeCueStartTimer);
     window.clearTimeout(this.swipeCueReturnTimer);
+    window.cancelAnimationFrame(this.swipeCueAnimationFrame ?? 0);
   }
 
   private playSwipeCue(swiperElement: StorySwiperElement): void {
@@ -164,23 +187,93 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
         return;
       }
 
-      const originalProgress = swiper.progress;
-      const direction = originalProgress > 0.96 ? -1 : 1;
-      const previewProgress = Math.min(Math.max(originalProgress + 0.055 * direction, 0), 1);
+      const originalIndex = swiper.activeIndex;
+      const originalTranslate = swiper.translate;
+      const direction = swiper.progress > 0.96 ? 1 : -1;
+      const dragDistance = swiper.size * 0.15;
+      const previewTranslate = Math.min(
+        Math.max(originalTranslate + dragDistance * direction, swiper.maxTranslate()),
+        swiper.minTranslate(),
+      );
 
-      swiper.setProgress(previewProgress, 650);
+      this.activeCueSwiper = swiper;
+      this.activeCueOrigin = originalIndex;
+      swiper.setTransition(0);
+      swiper.touchEventsData.isTouched = true;
+      swiper.touchEventsData.startTranslate = originalTranslate;
+      swiper.touchEventsData.currentTranslate = originalTranslate;
+
+      this.animateSwiperTouchDrag(swiper, originalTranslate, previewTranslate, 500);
 
       this.swipeCueReturnTimer = window.setTimeout(() => {
-        if (!this.swipeCueDismissed && !swiper.destroyed) {
-          swiper.setProgress(originalProgress, 720);
+        if (this.swipeCueDismissed || swiper.destroyed) {
+          return;
         }
-      }, 820);
+
+        swiper.touchEventsData.isTouched = false;
+        swiper.slideTo(originalIndex, 820, false);
+        this.activeCueSwiper = undefined;
+        this.activeCueOrigin = undefined;
+      }, 1120);
     }, 650);
   }
 
-  private cancelSwipeCue(): void {
+  private animateSwiperTouchDrag(
+    swiper: StorySwiperInstance,
+    from: number,
+    to: number,
+    duration: number,
+  ): void {
+    window.cancelAnimationFrame(this.swipeCueAnimationFrame ?? 0);
+    const startedAt = performance.now();
+
+    const renderFrame = (now: number): void => {
+      if (this.swipeCueDismissed || swiper.destroyed) {
+        return;
+      }
+
+      const progress = Math.min((now - startedAt) / duration, 1);
+      const easedProgress = -(Math.cos(Math.PI * progress) - 1) / 2;
+      const currentTranslate = from + (to - from) * easedProgress;
+
+      swiper.touchEventsData.currentTranslate = currentTranslate;
+      swiper.updateProgress(currentTranslate);
+      swiper.updateActiveIndex();
+      swiper.updateSlidesClasses();
+      swiper.setTranslate(currentTranslate);
+
+      if (progress < 1) {
+        this.swipeCueAnimationFrame = window.requestAnimationFrame(renderFrame);
+        return;
+      }
+
+      this.swipeCueAnimationFrame = undefined;
+    };
+
+    this.swipeCueAnimationFrame = window.requestAnimationFrame(renderFrame);
+  }
+
+  private cancelSwipeCue(restorePosition = false): void {
     window.clearTimeout(this.swipeCueStartTimer);
     window.clearTimeout(this.swipeCueReturnTimer);
+    window.cancelAnimationFrame(this.swipeCueAnimationFrame ?? 0);
+    this.swipeCueAnimationFrame = undefined;
+
+    if (this.activeCueSwiper && !this.activeCueSwiper.destroyed) {
+      this.activeCueSwiper.touchEventsData.isTouched = false;
+    }
+
+    if (
+      restorePosition &&
+      this.activeCueSwiper &&
+      !this.activeCueSwiper.destroyed &&
+      this.activeCueOrigin !== undefined
+    ) {
+      this.activeCueSwiper.slideTo(this.activeCueOrigin, 0, false);
+    }
+
+    this.activeCueSwiper = undefined;
+    this.activeCueOrigin = undefined;
   }
 
   protected getImageUrl(photo: StoryPhoto): string | null {
