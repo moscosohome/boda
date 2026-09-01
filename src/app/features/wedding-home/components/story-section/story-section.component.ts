@@ -166,15 +166,15 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
 
       const originalProgress = swiper.progress;
       const direction = originalProgress > 0.96 ? -1 : 1;
-      const previewProgress = Math.min(Math.max(originalProgress + 0.03 * direction, 0), 1);
+      const previewProgress = Math.min(Math.max(originalProgress + 0.055 * direction, 0), 1);
 
-      swiper.setProgress(previewProgress, 420);
+      swiper.setProgress(previewProgress, 650);
 
       this.swipeCueReturnTimer = window.setTimeout(() => {
         if (!this.swipeCueDismissed && !swiper.destroyed) {
-          swiper.setProgress(originalProgress, 560);
+          swiper.setProgress(originalProgress, 720);
         }
-      }, 520);
+      }, 820);
     }, 650);
   }
 
