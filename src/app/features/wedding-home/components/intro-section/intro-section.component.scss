@@ -7,9 +7,9 @@
 
 .intro-section::after {
   position: absolute;
-  right: clamp(-5rem, -10vw, -2rem);
-  bottom: -1.5rem;
-  width: min(19rem, 58vw);
+  right: clamp(1.5rem, 5vw, 4rem);
+  bottom: 0.5rem;
+  width: min(18rem, 52vw);
   aspect-ratio: 789 / 557;
   background: url('/images/logosololetras.png') center / contain no-repeat;
   content: '';

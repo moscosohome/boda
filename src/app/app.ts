@@ -10,6 +10,7 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App implements OnInit, OnDestroy {
   private readonly document = inject(DOCUMENT);
+  protected readonly showPaperGrain = signal(false);
   protected readonly showTopFade = signal(false);
   protected readonly showBottomFade = signal(false);
   private lastTouchEnd = 0;
@@ -27,8 +28,10 @@ export class App implements OnInit, OnDestroy {
     const viewportHeight = view.innerHeight;
     const maxScroll = Math.max(scrollingElement.scrollHeight - viewportHeight, 0);
     const hasLeftHero = scrollTop > viewportHeight * 0.72;
+    const hasEnteredContent = scrollTop > viewportHeight * 0.92;
     const isAtBottom = maxScroll - scrollTop <= 4;
 
+    this.showPaperGrain.set(hasEnteredContent);
     this.showTopFade.set(hasLeftHero);
     this.showBottomFade.set(hasLeftHero && !isAtBottom);
   };
