@@ -1,8 +1,10 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
   ElementRef,
+  NgZone,
   OnDestroy,
   inject,
 } from '@angular/core';
@@ -34,17 +36,24 @@ interface StorySwiperElement extends HTMLElement {
 @Component({
   selector: 'app-story-section',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './story-section.component.html',
   styleUrl: './story-section.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class StorySectionComponent implements AfterViewInit, OnDestroy {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly ngZone = inject(NgZone);
+  private swiperElement?: StorySwiperElement;
   private swipeCueObserver?: IntersectionObserver;
   private swipeCueStartTimer?: number;
   private swipeCueReturnTimer?: number;
   private swipeCueDismissed = false;
   private swipeCueArmed = true;
+  private readonly cancelSwipeCueOnInteraction = (): void => {
+    this.swipeCueDismissed = true;
+    this.cancelSwipeCue();
+  };
   protected readonly proposalInstagramUrl = 'https://www.instagram.com/p/DTn37xeDHpo/';
   protected readonly photos: StoryPhoto[] = [
     {
@@ -103,42 +112,44 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.swipeCueObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) {
-          return;
-        }
+    this.swiperElement = swiper;
 
-        if (!entry.isIntersecting || entry.intersectionRatio <= 0.08) {
-          this.cancelSwipeCue();
-          this.swipeCueDismissed = false;
-          this.swipeCueArmed = true;
-          return;
-        }
+    this.ngZone.runOutsideAngular(() => {
+      swiper.addEventListener('pointerdown', this.cancelSwipeCueOnInteraction, { passive: true });
 
-        if (entry.intersectionRatio >= 0.32 && this.swipeCueArmed) {
-          this.swipeCueArmed = false;
-          this.playSwipeCue(swiper);
-        }
-      },
-      {
-        rootMargin: '-18% 0px -18% 0px',
-        threshold: [0.08, 0.32],
-      },
-    );
+      this.swipeCueObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry) {
+            return;
+          }
 
-    this.swipeCueObserver.observe(swiper);
+          if (!entry.isIntersecting || entry.intersectionRatio <= 0.08) {
+            this.cancelSwipeCue();
+            this.swipeCueDismissed = false;
+            this.swipeCueArmed = true;
+            return;
+          }
+
+          if (entry.intersectionRatio >= 0.32 && this.swipeCueArmed) {
+            this.swipeCueArmed = false;
+            this.playSwipeCue(swiper);
+          }
+        },
+        {
+          rootMargin: '-18% 0px -18% 0px',
+          threshold: [0.08, 0.32],
+        },
+      );
+
+      this.swipeCueObserver.observe(swiper);
+    });
   }
 
   ngOnDestroy(): void {
     this.swipeCueObserver?.disconnect();
+    this.swiperElement?.removeEventListener('pointerdown', this.cancelSwipeCueOnInteraction);
     window.clearTimeout(this.swipeCueStartTimer);
     window.clearTimeout(this.swipeCueReturnTimer);
-  }
-
-  protected dismissSwipeCue(): void {
-    this.swipeCueDismissed = true;
-    this.cancelSwipeCue();
   }
 
   private playSwipeCue(swiperElement: StorySwiperElement): void {

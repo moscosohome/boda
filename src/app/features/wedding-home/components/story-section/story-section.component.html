@@ -25,7 +25,6 @@
         cards-effect-slide-shadows="false"
         speed="420"
         aria-label="Galería de la historia de Cristina y Antonio"
-        (pointerdown)="dismissSwipeCue()"
       >
         @for (photo of photos; track photo.label; let isFirst = $first) {
           <swiper-slide>
