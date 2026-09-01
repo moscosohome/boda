@@ -23,10 +23,11 @@
         cards-effect-per-slide-rotate="1.25"
         cards-effect-rotate="true"
         cards-effect-slide-shadows="false"
+        speed="420"
         aria-label="Galería de la historia de Cristina y Antonio"
         (pointerdown)="dismissSwipeCue()"
       >
-        @for (photo of photos; track photo.label) {
+        @for (photo of photos; track photo.label; let isFirst = $first) {
           <swiper-slide>
             <figure class="story-card">
               <div class="photo-frame" [class.has-image]="getImageUrl(photo) && !photo.hasLoadError">
@@ -34,7 +35,9 @@
                   <img
                     [src]="imageUrl"
                     [alt]="photo.alt"
-                    loading="lazy"
+                    [attr.loading]="isFirst ? 'eager' : 'lazy'"
+                    [attr.fetchpriority]="isFirst ? 'high' : 'low'"
+                    decoding="async"
                     (error)="markImageAsUnavailable(photo)"
                   />
                 } @else {

@@ -10,7 +10,7 @@ const calendarParams = new URLSearchParams({
 
 export const WEDDING_EVENT: WeddingEvent = {
   coupleNames: 'Cristina & Antonio',
-  dateLabel: '4 de septiembre',
+  dateLabel: '04 septiembre 2027',
   timeLabel: 'Pendiente de confirmar · aprox. 19:30',
   venue: 'Recreo San Luis',
   startsAt: '2027-09-04T19:30:00+02:00',

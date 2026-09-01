@@ -26,6 +26,7 @@ interface StorySwiperElement extends HTMLElement {
   swiper?: {
     activeIndex: number;
     destroyed: boolean;
+    progress: number;
     setProgress: (progress: number, speed?: number) => void;
   };
 }
@@ -43,37 +44,38 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
   private swipeCueStartTimer?: number;
   private swipeCueReturnTimer?: number;
   private swipeCueDismissed = false;
+  private swipeCueArmed = true;
   protected readonly proposalInstagramUrl = 'https://www.instagram.com/p/DTn37xeDHpo/';
   protected readonly photos: StoryPhoto[] = [
     {
       label: 'Foto 01',
       moment: '2013',
       caption: 'Una de nuestras primeras fotos juntos. Sin imaginar todo lo que vendría después.',
-      imageUrls: ['/images/primera_foto.png'],
+      imageUrls: ['/images/primera_foto.webp', '/images/primera_foto.png'],
       alt: 'Cristina & Antonio al comienzo de su historia',
     },
     {
       label: 'Foto 02',
       moment: '2015',
-      imageUrls: ['/images/segunda_foto.png'],
+      imageUrls: ['/images/segunda_foto.webp', '/images/segunda_foto.png'],
       alt: 'Retrato en acuarela de Cristina & Antonio abrazados',
     },
     {
       label: 'Foto 03',
       moment: '2018',
-      imageUrls: ['/images/tercera_foto.png'],
+      imageUrls: ['/images/tercera_foto.webp', '/images/tercera_foto.png'],
       alt: 'Retrato en acuarela de Antonio besando a Cristina en la mejilla',
     },
     {
       label: 'Foto 04',
       moment: '2021',
-      imageUrls: ['/images/cuarta_foto.png'],
+      imageUrls: ['/images/cuarta_foto.webp', '/images/cuarta_foto.png'],
       alt: 'Las manos de Cristina & Antonio formando un corazón alrededor de las llaves de su hogar',
     },
     {
       label: 'Foto 05',
       moment: '2025',
-      imageUrls: ['/images/quinta_foto.png'],
+      imageUrls: ['/images/quinta_foto.webp', '/images/quinta_foto.png'],
       alt: 'Cristina & Antonio paseando de la mano junto al mar',
     },
     {
@@ -103,14 +105,26 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
 
     this.swipeCueObserver = new IntersectionObserver(
       ([entry]) => {
-        if (!entry?.isIntersecting || entry.intersectionRatio < 0.45) {
+        if (!entry) {
           return;
         }
 
-        this.playSwipeCue(swiper);
-        this.swipeCueObserver?.disconnect();
+        if (!entry.isIntersecting || entry.intersectionRatio <= 0.08) {
+          this.cancelSwipeCue();
+          this.swipeCueDismissed = false;
+          this.swipeCueArmed = true;
+          return;
+        }
+
+        if (entry.intersectionRatio >= 0.32 && this.swipeCueArmed) {
+          this.swipeCueArmed = false;
+          this.playSwipeCue(swiper);
+        }
       },
-      { threshold: [0.45] },
+      {
+        rootMargin: '-18% 0px -18% 0px',
+        threshold: [0.08, 0.32],
+      },
     );
 
     this.swipeCueObserver.observe(swiper);
@@ -124,8 +138,7 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
 
   protected dismissSwipeCue(): void {
     this.swipeCueDismissed = true;
-    window.clearTimeout(this.swipeCueStartTimer);
-    window.clearTimeout(this.swipeCueReturnTimer);
+    this.cancelSwipeCue();
   }
 
   private playSwipeCue(swiperElement: StorySwiperElement): void {
@@ -136,18 +149,27 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
     this.swipeCueStartTimer = window.setTimeout(() => {
       const swiper = swiperElement.swiper;
 
-      if (this.swipeCueDismissed || !swiper || swiper.destroyed || swiper.activeIndex !== 0) {
+      if (this.swipeCueDismissed || !swiper || swiper.destroyed) {
         return;
       }
 
-      swiper.setProgress(0.03, 420);
+      const originalProgress = swiper.progress;
+      const direction = originalProgress > 0.96 ? -1 : 1;
+      const previewProgress = Math.min(Math.max(originalProgress + 0.03 * direction, 0), 1);
+
+      swiper.setProgress(previewProgress, 420);
 
       this.swipeCueReturnTimer = window.setTimeout(() => {
-        if (!this.swipeCueDismissed && !swiper.destroyed && swiper.activeIndex === 0) {
-          swiper.setProgress(0, 560);
+        if (!this.swipeCueDismissed && !swiper.destroyed) {
+          swiper.setProgress(originalProgress, 560);
         }
       }, 520);
     }, 650);
+  }
+
+  private cancelSwipeCue(): void {
+    window.clearTimeout(this.swipeCueStartTimer);
+    window.clearTimeout(this.swipeCueReturnTimer);
   }
 
   protected getImageUrl(photo: StoryPhoto): string | null {

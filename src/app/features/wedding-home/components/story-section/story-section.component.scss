@@ -22,6 +22,8 @@
   height: clamp(32rem, 160vw, 44rem);
   margin-inline: auto;
   overflow: visible;
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
   --swiper-pagination-bottom: 0.65rem;
   --swiper-pagination-bullet-horizontal-gap: 0.22rem;
 }
@@ -51,6 +53,9 @@ swiper-slide {
   border-radius: calc(var(--radius-md) + 0.2rem);
   background: rgba(255, 250, 242, 0.98);
   box-shadow: 0 1.15rem 3rem rgba(61, 52, 39, 0.18);
+  backface-visibility: hidden;
+  contain: layout paint;
+  -webkit-backface-visibility: hidden;
 }
 
 .story-card {
@@ -262,5 +267,19 @@ figcaption {
 
   .story-grid {
     gap: 2.25rem;
+  }
+
+  swiper-slide {
+    box-shadow: 0 0.8rem 1.8rem rgba(61, 52, 39, 0.14);
+  }
+
+  .photo-frame {
+    box-shadow: 0 0.7rem 1.6rem rgba(61, 52, 39, 0.11);
+  }
+
+  .photo-moment {
+    background: rgba(255, 250, 242, 0.94);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
