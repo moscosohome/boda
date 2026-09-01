@@ -7,8 +7,8 @@
 
 .intro-section::after {
   position: absolute;
-  right: clamp(1.5rem, 5vw, 4rem);
-  bottom: 0.5rem;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(0.75rem, 2vw, 1.5rem);
   width: min(18rem, 52vw);
   aspect-ratio: 789 / 557;
   background: url('/images/logosololetras.png') center / contain no-repeat;
@@ -23,6 +23,7 @@
   position: relative;
   z-index: 1;
   max-width: 920px;
+  isolation: isolate;
 }
 
 .intro-line {
