@@ -191,6 +191,15 @@ textarea:focus {
   color: #8a4f3d;
 }
 
+.device-data-notice {
+  margin: 0;
+  border-left: 2px solid rgba(193, 126, 130, 0.48);
+  padding-left: 0.8rem;
+  color: var(--color-warm-gray);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
 .bot-field {
   position: absolute;
   width: 1px;

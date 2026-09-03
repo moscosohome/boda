@@ -3,6 +3,13 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 
 type SubmissionStatus = 'idle' | 'sending' | 'success' | 'error';
 
+type NavigatorWithDeviceData = Navigator & {
+  userAgentData?: {
+    platform?: string;
+    getHighEntropyValues?: (hints: string[]) => Promise<Record<string, unknown>>;
+  };
+};
+
 @Component({
   selector: 'app-guest-message-section',
   standalone: true,
@@ -61,6 +68,7 @@ export class GuestMessageSectionComponent implements OnDestroy {
           message: this.form.controls.message.value.trim(),
           website: this.form.controls.website.value,
           startedAt: this.formOpenedAt,
+          device: await this.collectDeviceData(),
         }),
       });
 
@@ -101,5 +109,28 @@ export class GuestMessageSectionComponent implements OnDestroy {
       clearTimeout(this.feedbackTimer);
       this.feedbackTimer = undefined;
     }
+  }
+
+  private async collectDeviceData(): Promise<Record<string, unknown>> {
+    const browser = navigator as NavigatorWithDeviceData;
+    const userAgentData = browser.userAgentData;
+    let highEntropyData: Record<string, unknown> = {};
+
+    if (userAgentData?.getHighEntropyValues) {
+      try {
+        highEntropyData = await userAgentData.getHighEntropyValues(['model', 'platformVersion']);
+      } catch {
+        // Some browsers deliberately withhold detailed device information.
+      }
+    }
+
+    return {
+      model: highEntropyData['model'],
+      platform: userAgentData?.platform || browser.platform,
+      platformVersion: highEntropyData['platformVersion'],
+      userAgent: browser.userAgent,
+      screen: `${window.screen.width} × ${window.screen.height}`,
+      availableScreen: `${window.screen.availWidth} × ${window.screen.availHeight}`,
+    };
   }
 }

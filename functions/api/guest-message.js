@@ -14,6 +14,21 @@ const cleanText = (value, maxLength) =>
     .trim()
     .slice(0, maxLength);
 
+const inlineValue = (value, maxLength = 240) => {
+  if (value === undefined || value === null || value === '') {
+    return 'No disponible';
+  }
+
+  let serialized;
+  try {
+    serialized = typeof value === 'string' ? value : JSON.stringify(value);
+  } catch {
+    serialized = String(value);
+  }
+
+  return cleanText(serialized, maxLength).replace(/\s+/g, ' ') || 'No disponible';
+};
+
 export async function onRequestPost({ request, env }) {
   const fetchSite = request.headers.get('Sec-Fetch-Site');
 
@@ -56,7 +71,28 @@ export async function onRequestPost({ request, env }) {
   }
 
   const sender = name || 'Anónimo';
-  const telegramText = `💌 Nuevo mensaje de la invitación\n\nDe: ${sender}\n\n${message}`;
+  const device = payload.device && typeof payload.device === 'object' ? payload.device : {};
+
+  const deviceDetails = [
+    `Modelo: ${inlineValue(device.model)}`,
+    `Plataforma: ${inlineValue(device.platform)}`,
+    `Versión de plataforma: ${inlineValue(device.platformVersion)}`,
+    `User-Agent: ${inlineValue(device.userAgent, 500)}`,
+    `Pantalla: ${inlineValue(device.screen)}`,
+    `Pantalla disponible: ${inlineValue(device.availableScreen)}`,
+  ];
+
+  const telegramText = [
+    '💌 Nuevo mensaje de la invitación',
+    '',
+    `De: ${sender}`,
+    '',
+    message,
+    '',
+    '📱 DATOS DEL DISPOSITIVO',
+    ...deviceDetails,
+  ].join('\n');
+
   const telegramResponse = await fetch(
     `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
     {
