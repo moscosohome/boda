@@ -9,7 +9,6 @@
 }
 
 .hero-media,
-.hero-media::after,
 .hero-photo-placeholder {
   position: absolute;
   inset: 0;
@@ -23,8 +22,8 @@
 .hero-photo-placeholder {
   overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(91, 58, 66, 0.54), rgba(250, 245, 243, 0.1)),
-    radial-gradient(circle at 52% 32%, rgba(230, 184, 183, 0.38), transparent 22rem),
+    linear-gradient(135deg, rgba(91, 58, 66, 0.38), rgba(250, 245, 243, 0.14)),
+    radial-gradient(circle at 52% 32%, rgba(230, 184, 183, 0.46), transparent 22rem),
     linear-gradient(
       115deg,
       var(--color-olive-dark),
@@ -45,12 +44,6 @@
   opacity: 0.75;
   transform: translate3d(-3%, -2%, 0) scale(1.02);
   animation: hero-light-drift 13s ease-in-out infinite alternate;
-}
-
-.hero-media::after {
-  z-index: 1;
-  background: linear-gradient(180deg, rgba(46, 43, 39, 0.14), rgba(46, 43, 39, 0.4));
-  content: "";
 }
 
 .hero-topline {
