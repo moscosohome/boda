@@ -6,6 +6,8 @@
   --color-blush: #e6b8b7;
   --color-gold: #b59a67;
   --color-gold-soft: #d8c59b;
+  --color-gold-text: #896a3d;
+  --color-rose-text: #8f6068;
   --color-warm-gray: #5e5a52;
   --color-ink: #2e2b27;
   --color-line: rgba(93, 87, 75, 0.18);
@@ -70,7 +72,7 @@ svg {
 
 .section-kicker {
   margin: 0 0 0.65rem;
-  color: var(--color-gold);
+  color: var(--color-gold-text);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.16em;

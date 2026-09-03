@@ -139,8 +139,7 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
       moment: '4 de diciembre · 2025',
       caption:
         'Y llegó el día. Aquella tarde de diciembre, a las siete —porque el siete siempre ha sido nuestro número—, todo salió tal y como lo había imaginado. ' +
-        'Solo tú y yo, los nervios, París ante nosotros… y, de repente, la Torre empezó a parpadear. ' +
-        'Era nuestro momento.',
+        'Solo tú y yo, los nervios, París ante nosotros… y, de repente, la Torre empezó a parpadear. ',
       imageUrls: [
         '/images/pedida-paris.webp',
         '/images/pedida-paris.png',
