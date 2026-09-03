@@ -49,9 +49,9 @@
 swiper-slide {
   height: 100%;
   overflow: hidden;
-  border: 1px solid rgba(181, 154, 103, 0.34);
+  border: 1px solid var(--color-card-border);
   border-radius: calc(var(--radius-md) + 0.2rem);
-  background: rgba(255, 250, 242, 0.98);
+  background: rgba(255, 250, 242, 0.92);
   box-shadow: 0 1.15rem 3rem rgba(61, 52, 39, 0.18);
   backface-visibility: hidden;
   contain: layout paint;
@@ -144,19 +144,24 @@ figcaption {
 }
 
 .proposal-video-link {
+  position: relative;
   display: flex;
   width: min(100%, 34rem);
   min-height: 4.75rem;
   align-items: center;
   gap: 0.85rem;
   margin: 1.5rem auto 0;
-  border: 1px solid rgba(181, 154, 103, 0.4);
-  border-radius: var(--radius-md);
-  padding: 0.8rem 0.9rem;
-  background: linear-gradient(135deg, rgba(255, 250, 242, 0.92), rgba(230, 184, 183, 0.2));
+  overflow: hidden;
+  border: 1px solid var(--color-card-border);
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  background:
+    radial-gradient(circle at 92% 48%, rgba(230, 184, 183, 0.5), transparent 7rem),
+    radial-gradient(circle at 8% 20%, rgba(255, 250, 242, 0.94), transparent 6rem),
+    linear-gradient(145deg, rgba(250, 245, 243, 0.96), rgba(215, 192, 187, 0.24));
   color: var(--color-ink);
   text-decoration: none;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-card);
   transition:
     border-color 180ms ease,
     background 180ms ease,
@@ -189,27 +194,60 @@ figcaption {
 
 .proposal-video-link:hover,
 .proposal-video-link:focus-visible {
-  border-color: rgba(181, 154, 103, 0.75);
-  background: rgba(255, 250, 242, 0.96);
+  border-color: rgba(179, 124, 133, 0.62);
   transform: translateY(-2px);
 }
 
 .proposal-video-icon {
+  position: relative;
   display: grid;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 3.15rem;
+  height: 3.15rem;
   flex: 0 0 auto;
   align-items: center;
   place-items: center;
   border-radius: 50%;
   background: var(--color-olive-dark);
   color: var(--color-ivory);
+  box-shadow: 0 0.65rem 1.5rem rgba(91, 58, 66, 0.16);
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.proposal-video-icon::after {
+  position: absolute;
+  inset: -0.3rem;
+  border: 1px solid rgba(179, 124, 133, 0.3);
+  border-radius: inherit;
+  content: '';
+  animation: proposal-play-pulse 3.6s ease-out infinite;
 }
 
 .proposal-video-icon svg {
   width: 1.2rem;
   height: 1.2rem;
   fill: currentColor;
+}
+
+.proposal-video-link:hover .proposal-video-icon,
+.proposal-video-link:focus-visible .proposal-video-icon {
+  background: var(--color-olive);
+  transform: scale(1.05);
+}
+
+@keyframes proposal-play-pulse {
+  0%,
+  58% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+
+  86%,
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
 }
 
 .proposal-video-copy {

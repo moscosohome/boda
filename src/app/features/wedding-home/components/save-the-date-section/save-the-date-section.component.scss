@@ -12,14 +12,6 @@
   max-width: 38rem;
 }
 
-.save-the-date-date {
-  margin: 1.5rem 0 0;
-  color: var(--color-rose-text);
-  font-size: clamp(0.84rem, 2.4vw, 1rem);
-  font-weight: 750;
-  letter-spacing: 0.2em;
-}
-
 .save-the-date-video {
   width: min(100%, 30rem);
   justify-self: center;
@@ -134,29 +126,52 @@
   position: relative;
   display: grid;
   width: 100%;
-  min-height: 13rem;
-  grid-template-columns: 1fr auto;
+  min-height: 9.25rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1.25rem;
+  gap: clamp(0.75rem, 3vw, 1.25rem);
   overflow: hidden;
-  border: 1px solid rgba(181, 154, 103, 0.38);
-  border-radius: var(--radius-md);
-  padding: 2.25rem 1.5rem 2rem;
+  border: 1px solid var(--color-card-border);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 250, 242, 0.9), transparent 9rem),
-    linear-gradient(160deg, rgba(230, 184, 183, 0.66), rgba(250, 245, 243, 0.94) 56%, #d7c0bb);
+    radial-gradient(circle at 92% 48%, rgba(230, 184, 183, 0.58), transparent 9rem),
+    radial-gradient(circle at 8% 20%, rgba(255, 250, 242, 0.94), transparent 7rem),
+    linear-gradient(145deg, rgba(250, 245, 243, 0.96), rgba(215, 192, 187, 0.28));
   color: var(--color-ink);
   text-align: left;
   cursor: pointer;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-card);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .video-poster::after {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 58%, rgba(179, 124, 133, 0.12));
+  top: 50%;
+  right: -4.5rem;
+  width: 10rem;
+  border: 1px solid rgba(255, 250, 242, 0.42);
+  border-radius: 50%;
+  aspect-ratio: 1;
   content: '';
   pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.video-poster:hover,
+.video-poster:focus-visible {
+  border-color: rgba(179, 124, 133, 0.62);
+  box-shadow:
+    0 1.35rem 3.2rem rgba(61, 52, 39, 0.17),
+    inset 0 1px 0 rgba(255, 250, 242, 0.88);
+  transform: translateY(-2px);
+}
+
+.video-poster:active {
+  transform: scale(0.99);
 }
 
 .video-poster:focus-visible {
@@ -165,12 +180,12 @@
 }
 
 .video-poster img {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  width: 3.4rem;
+  position: relative;
+  z-index: 1;
+  width: 3.55rem;
   height: auto;
-  opacity: 0.58;
+  justify-self: center;
+  opacity: 0.66;
 }
 
 .poster-content,
@@ -182,8 +197,11 @@
 }
 
 .poster-content {
+  min-width: 0;
+  align-items: center;
   justify-content: center;
-  padding-top: 1.25rem;
+  gap: 0.25rem;
+  text-align: center;
 }
 
 .poster-action {
@@ -192,7 +210,6 @@
 }
 
 .poster-kicker,
-.poster-date,
 .poster-cta {
   position: relative;
   z-index: 1;
@@ -204,36 +221,33 @@
 
 .poster-kicker {
   color: var(--color-rose-text);
-  font-size: 0.68rem;
-}
-
-.poster-title {
-  margin-top: 0.45rem;
-  font-family: var(--font-serif);
-  font-size: clamp(2.15rem, 10vw, 3.1rem);
-  font-weight: 400;
-  line-height: 0.95;
-}
-
-.poster-date {
-  margin-top: 1.15rem;
-  color: var(--color-warm-gray);
-  font-size: 0.68rem;
+  font-size: clamp(0.68rem, 2.5vw, 0.82rem);
+  line-height: 1.35;
 }
 
 .poster-play {
+  position: relative;
   display: grid;
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 3.6rem;
+  height: 3.6rem;
   place-items: center;
-  border: 1px solid rgba(179, 124, 133, 0.48);
+  border: 0;
   border-radius: 50%;
-  background: rgba(255, 250, 242, 0.72);
-  color: var(--color-olive-dark);
-  box-shadow: 0 12px 30px rgba(61, 52, 39, 0.12);
+  background: var(--color-olive-dark);
+  color: var(--color-ivory);
+  box-shadow: 0 0.75rem 1.75rem rgba(91, 58, 66, 0.18);
   transition:
     background 180ms ease,
     transform 180ms ease;
+}
+
+.poster-play::after {
+  position: absolute;
+  inset: -0.35rem;
+  border: 1px solid rgba(179, 124, 133, 0.3);
+  border-radius: inherit;
+  content: '';
+  animation: poster-play-pulse 3.6s ease-out infinite;
 }
 
 .poster-play svg {
@@ -244,15 +258,29 @@
 
 .poster-cta {
   margin-top: 0.65rem;
-  color: var(--color-warm-gray);
-  font-size: 0.58rem;
+  color: var(--color-rose-text);
+  font-size: 0.6rem;
   white-space: nowrap;
 }
 
 .video-poster:hover .poster-play,
 .video-poster:focus-visible .poster-play {
-  background: var(--color-ivory);
+  background: var(--color-olive);
   transform: scale(1.06);
+}
+
+@keyframes poster-play-pulse {
+  0%,
+  58% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+
+  86%,
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
 }
 
 .poster-ornament {
@@ -260,15 +288,15 @@
   right: 1.6rem;
   left: 1.6rem;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(181, 154, 103, 0.64), transparent);
+  background: linear-gradient(90deg, transparent, rgba(193, 126, 130, 0.42), transparent);
 }
 
 .poster-ornament-top {
-  top: 1.15rem;
+  top: 0.9rem;
 }
 
 .poster-ornament-bottom {
-  bottom: 1.15rem;
+  bottom: 0.9rem;
 }
 
 .video-modal {
@@ -335,24 +363,30 @@
   background: rgba(46, 43, 39, 0.88);
 }
 
-.video-caption {
-  margin: 0.75rem 0 0;
-  color: var(--color-warm-gray);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
 @media (max-width: 859px) {
   .save-the-date-section {
-    padding: 3rem 0 4.5rem;
+    padding: 3rem 0 1rem;
   }
 
   .save-the-date-grid {
     gap: 2.25rem;
   }
+}
+
+@media (max-width: 360px) {
+  .video-poster {
+    padding-inline: 1rem;
+  }
+
+  .video-poster img {
+    width: 2.85rem;
+  }
+
+  .poster-play {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
 }
 
 @media (min-width: 860px) {

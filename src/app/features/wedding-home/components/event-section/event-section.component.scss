@@ -11,11 +11,11 @@
 .event-card {
   display: grid;
   gap: 1.4rem;
-  border: 1px solid rgba(181, 154, 103, 0.28);
+  border: 1px solid var(--color-card-border);
   border-radius: var(--radius-md);
   padding: clamp(1.25rem, 5vw, 2rem);
-  background: rgba(255, 250, 242, 0.82);
-  box-shadow: var(--shadow-soft);
+  background: var(--color-card-bg);
+  box-shadow: var(--shadow-card);
   backdrop-filter: blur(18px);
 }
 

@@ -10,11 +10,11 @@
 .rsvp-panel {
   display: grid;
   gap: 1rem;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-card-border);
   border-radius: var(--radius-md);
   padding: clamp(1.2rem, 5vw, 2rem);
-  background: rgba(255, 250, 242, 0.76);
-  box-shadow: var(--shadow-soft);
+  background: var(--color-card-bg);
+  box-shadow: var(--shadow-card);
 }
 
 label,

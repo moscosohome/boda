@@ -6,10 +6,10 @@
   max-width: 50rem;
   margin-inline: auto;
   overflow: hidden;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-card-border);
   border-radius: var(--radius-md);
-  background: rgba(255, 250, 242, 0.78);
-  box-shadow: var(--shadow-soft);
+  background: var(--color-card-bg);
+  box-shadow: var(--shadow-card);
 }
 
 .guest-message-toggle {

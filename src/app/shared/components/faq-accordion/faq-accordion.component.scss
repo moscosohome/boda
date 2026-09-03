@@ -4,9 +4,10 @@
 }
 
 .faq-item {
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-card-border);
   border-radius: var(--radius-md);
-  background: rgba(255, 250, 242, 0.66);
+  background: var(--color-card-bg);
+  box-shadow: var(--shadow-card-subtle);
   overflow: hidden;
 }
 
@@ -28,6 +29,11 @@ button {
   cursor: pointer;
   font-weight: 700;
   text-align: left;
+  transition: background 180ms ease;
+}
+
+button[aria-expanded="true"] {
+  background: rgba(230, 184, 183, 0.12);
 }
 
 button:focus-visible {
