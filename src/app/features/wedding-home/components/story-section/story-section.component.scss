@@ -49,9 +49,11 @@
 swiper-slide {
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--color-card-border);
+  border: 1px solid transparent;
   border-radius: calc(var(--radius-md) + 0.2rem);
-  background: rgba(255, 250, 242, 0.92);
+  background:
+    linear-gradient(rgba(255, 250, 242, 0.92), rgba(255, 250, 242, 0.92)) padding-box,
+    var(--card-border-gradient) border-box;
   box-shadow: 0 1.15rem 3rem rgba(61, 52, 39, 0.18);
   backface-visibility: hidden;
   contain: layout paint;
@@ -152,13 +154,14 @@ figcaption {
   gap: 0.85rem;
   margin: 1.5rem auto 0;
   overflow: hidden;
-  border: 1px solid var(--color-card-border);
+  border: 1px solid transparent;
   border-radius: 1rem;
   padding: 0.9rem 1rem;
   background:
-    radial-gradient(circle at 92% 48%, rgba(230, 184, 183, 0.5), transparent 7rem),
-    radial-gradient(circle at 8% 20%, rgba(255, 250, 242, 0.94), transparent 6rem),
-    linear-gradient(145deg, rgba(250, 245, 243, 0.96), rgba(215, 192, 187, 0.24));
+    radial-gradient(circle at 92% 48%, rgba(230, 184, 183, 0.5), transparent 7rem) padding-box,
+    radial-gradient(circle at 8% 20%, rgba(255, 250, 242, 0.94), transparent 6rem) padding-box,
+    linear-gradient(145deg, rgba(250, 245, 243, 0.96), rgba(215, 192, 187, 0.24)) padding-box,
+    var(--card-border-gradient) border-box;
   color: var(--color-ink);
   text-decoration: none;
   box-shadow: var(--shadow-card);

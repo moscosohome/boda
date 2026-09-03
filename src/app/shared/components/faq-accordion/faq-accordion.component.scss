@@ -4,9 +4,9 @@
 }
 
 .faq-item {
-  border: 1px solid var(--color-card-border);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  background: var(--color-card-bg);
+  background: var(--card-surface);
   box-shadow: var(--shadow-card-subtle);
   overflow: hidden;
 }
@@ -33,12 +33,22 @@ button {
 }
 
 button[aria-expanded="true"] {
-  background: rgba(230, 184, 183, 0.12);
+  background: transparent;
 }
 
 button:focus-visible {
-  outline: 2px solid var(--color-gold);
-  outline-offset: -4px;
+  outline: none;
+}
+
+.faq-item:has(button:focus-visible) {
+  outline: 2px solid rgba(193, 126, 130, 0.58);
+  outline-offset: 2px;
+}
+
+.faq-item:has(button[aria-expanded="true"]) {
+  box-shadow:
+    0 0 0 1px rgba(193, 126, 130, 0.1),
+    var(--shadow-card-subtle);
 }
 
 .faq-icon {

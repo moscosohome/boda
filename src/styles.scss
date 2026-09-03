@@ -11,13 +11,26 @@
   --color-warm-gray: #5e5a52;
   --color-ink: #2e2b27;
   --color-line: rgba(93, 87, 75, 0.18);
-  --color-card-border: rgba(181, 154, 103, 0.32);
+  --color-card-border: rgba(193, 126, 130, 0.34);
   --color-card-bg: rgba(255, 250, 242, 0.8);
+  --card-border-gradient: linear-gradient(
+    135deg,
+    rgba(255, 250, 242, 0.96),
+    rgba(230, 184, 183, 0.76) 48%,
+    rgba(193, 126, 130, 0.46) 76%,
+    rgba(216, 197, 155, 0.5)
+  );
+  --card-surface:
+    linear-gradient(var(--color-card-bg), var(--color-card-bg)) padding-box,
+    var(--card-border-gradient) border-box;
   --shadow-soft: 0 22px 60px rgba(61, 52, 39, 0.13);
   --shadow-card:
-    0 1.15rem 2.8rem rgba(61, 52, 39, 0.12),
+    0 1.25rem 3rem rgba(143, 96, 104, 0.12),
+    0 0.25rem 0.8rem rgba(193, 126, 130, 0.07),
     inset 0 1px 0 rgba(255, 250, 242, 0.82);
-  --shadow-card-subtle: 0 0.65rem 1.8rem rgba(61, 52, 39, 0.07);
+  --shadow-card-subtle:
+    0 0.7rem 1.8rem rgba(143, 96, 104, 0.07),
+    inset 0 1px 0 rgba(255, 250, 242, 0.72);
   --radius-sm: 0.5rem;
   --radius-md: 1rem;
   --space-page: clamp(1.25rem, 5vw, 5rem);

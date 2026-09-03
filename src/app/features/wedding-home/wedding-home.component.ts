@@ -71,6 +71,7 @@ export class WeddingHomeComponent implements AfterViewInit, OnDestroy {
           if (
             options.skipLateSections &&
             (element.closest('.faq-section') ||
+              element.closest('.guest-message-section') ||
               element.closest('.gift-section') ||
               element.closest('footer'))
           ) {
