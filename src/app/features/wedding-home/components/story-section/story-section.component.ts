@@ -64,14 +64,42 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
   private swipeCueObserver?: IntersectionObserver;
   private swipeCueStartTimer?: number;
   private swipeCueReturnTimer?: number;
+  private swipeCueResumeTimer?: number;
   private swipeCueAnimationFrame?: number;
   private swipeCueDismissed = false;
   private swipeCueArmed = true;
+  private carouselIsCentered = false;
+  private interactionStart?: { x: number; y: number };
   private activeCueSwiper?: StorySwiperInstance;
   private activeCueOrigin?: number;
-  private readonly cancelSwipeCueOnInteraction = (): void => {
+  private readonly cancelSwipeCueOnInteraction = (event: PointerEvent): void => {
+    this.interactionStart = { x: event.clientX, y: event.clientY };
     this.swipeCueDismissed = true;
     this.cancelSwipeCue();
+  };
+  private readonly resumeSwipeCueAfterInteraction = (event: PointerEvent): void => {
+    const start = this.interactionStart;
+    this.interactionStart = undefined;
+
+    if (!start) {
+      return;
+    }
+
+    const horizontalDistance = Math.abs(event.clientX - start.x);
+    const verticalDistance = Math.abs(event.clientY - start.y);
+
+    if (horizontalDistance > verticalDistance) {
+      return;
+    }
+
+    window.clearTimeout(this.swipeCueResumeTimer);
+    this.swipeCueResumeTimer = window.setTimeout(() => {
+      this.swipeCueDismissed = false;
+
+      if (this.carouselIsCentered && this.swiperElement) {
+        this.playSwipeCue(this.swiperElement);
+      }
+    }, 450);
   };
   protected readonly proposalInstagramUrl = 'https://www.instagram.com/p/DTn37xeDHpo/';
   protected readonly photos: StoryPhoto[] = [
@@ -138,6 +166,14 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
         capture: true,
         passive: true,
       });
+      swiper.addEventListener('pointerup', this.resumeSwipeCueAfterInteraction, {
+        capture: true,
+        passive: true,
+      });
+      swiper.addEventListener('pointercancel', this.resumeSwipeCueAfterInteraction, {
+        capture: true,
+        passive: true,
+      });
 
       this.swipeCueObserver = new IntersectionObserver(
         ([entry]) => {
@@ -146,11 +182,14 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
           }
 
           if (!entry.isIntersecting || entry.intersectionRatio <= 0.08) {
+            this.carouselIsCentered = false;
             this.cancelSwipeCue(true);
             this.swipeCueDismissed = false;
             this.swipeCueArmed = true;
             return;
           }
+
+          this.carouselIsCentered = entry.intersectionRatio >= 0.32;
 
           if (entry.intersectionRatio >= 0.32 && this.swipeCueArmed) {
             this.swipeCueArmed = false;
@@ -170,16 +209,23 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.swipeCueObserver?.disconnect();
     this.swiperElement?.removeEventListener('pointerdown', this.cancelSwipeCueOnInteraction, true);
+    this.swiperElement?.removeEventListener(
+      'pointerup',
+      this.resumeSwipeCueAfterInteraction,
+      true,
+    );
+    this.swiperElement?.removeEventListener(
+      'pointercancel',
+      this.resumeSwipeCueAfterInteraction,
+      true,
+    );
     window.clearTimeout(this.swipeCueStartTimer);
     window.clearTimeout(this.swipeCueReturnTimer);
+    window.clearTimeout(this.swipeCueResumeTimer);
     window.cancelAnimationFrame(this.swipeCueAnimationFrame ?? 0);
   }
 
   private playSwipeCue(swiperElement: StorySwiperElement): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
     this.swipeCueStartTimer = window.setTimeout(() => {
       const swiper = swiperElement.swiper;
 
@@ -190,7 +236,7 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
       const originalIndex = swiper.activeIndex;
       const originalTranslate = swiper.translate;
       const direction = swiper.progress > 0.96 ? 1 : -1;
-      const dragDistance = swiper.size * 0.15;
+      const dragDistance = swiper.size * 0.30;
       const previewTranslate = Math.min(
         Math.max(originalTranslate + dragDistance * direction, swiper.maxTranslate()),
         swiper.minTranslate(),
@@ -203,7 +249,7 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
       swiper.touchEventsData.startTranslate = originalTranslate;
       swiper.touchEventsData.currentTranslate = originalTranslate;
 
-      this.animateSwiperTouchDrag(swiper, originalTranslate, previewTranslate, 500);
+      this.animateSwiperTouchDrag(swiper, originalTranslate, previewTranslate, 850);
 
       this.swipeCueReturnTimer = window.setTimeout(() => {
         if (this.swipeCueDismissed || swiper.destroyed) {
@@ -214,7 +260,7 @@ export class StorySectionComponent implements AfterViewInit, OnDestroy {
         swiper.slideTo(originalIndex, 820, false);
         this.activeCueSwiper = undefined;
         this.activeCueOrigin = undefined;
-      }, 1120);
+      }, 1050);
     }, 650);
   }
 
