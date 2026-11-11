@@ -51,6 +51,13 @@ export class App implements OnInit, OnDestroy {
   ngOnInit(): void {
     const view = this.document.defaultView;
 
+    if (view?.location.hostname === 'www.cristinayantonio.com.es') {
+      const canonicalUrl = new URL(view.location.href);
+      canonicalUrl.hostname = 'cristinayantonio.com.es';
+      view.location.replace(canonicalUrl.toString());
+      return;
+    }
+
     view?.addEventListener('scroll', this.scheduleViewportFadeUpdate, { passive: true });
     view?.addEventListener('resize', this.scheduleViewportFadeUpdate, { passive: true });
     this.scheduleViewportFadeUpdate();
