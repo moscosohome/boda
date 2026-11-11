@@ -181,6 +181,12 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  protected retryConfig(): void {
+    this.error.set('');
+    this.loading.set(true);
+    void this.loadConfig();
+  }
+
   private validateSourceFile(file: File): void {
     if (file.size > MAX_SOURCE_BYTES) {
       throw new Error('Esta foto es demasiado grande para prepararla en el móvil.');

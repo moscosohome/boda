@@ -119,6 +119,13 @@
           {{ uploading() ? 'Compartiendo…' : 'Compartir fotos' }}
         </button>
         <p class="privacy-note">Solo Cristina y Antonio podrán ver las fotografías.</p>
+      } @else {
+        <div class="config-error" role="alert">
+          <p>{{ error() || 'No hemos podido preparar la subida de fotos.' }}</p>
+          <button type="button" class="secondary-button" (click)="retryConfig()">
+            Volver a intentarlo
+          </button>
+        </div>
       }
     </section>
   }
