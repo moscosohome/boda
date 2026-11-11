@@ -289,12 +289,16 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
         'error-callback': () => {
           this.turnstileToken = '';
           this.turnstileReady.set(false);
-          this.turnstileError.set('No hemos podido completar la comprobación de seguridad.');
+          this.turnstileError.set(
+            'No hemos podido completar la comprobación de seguridad. Si has abierto el enlace desde WhatsApp o Instagram, ábrelo en Safari o Chrome.',
+          );
           return true;
         },
       });
     } catch {
-      this.turnstileError.set('No hemos podido cargar la comprobación de seguridad. Revisa tu conexión.');
+      this.turnstileError.set(
+        'No hemos podido cargar la comprobación de seguridad. Si has abierto el enlace desde WhatsApp o Instagram, ábrelo en Safari o Chrome.',
+      );
     }
   }
 
