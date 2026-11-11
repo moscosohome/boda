@@ -118,11 +118,12 @@ La ruta `/admin-fotos` muestra el uso, las últimas fotografías, permite elimin
 
 ### Arquitectura y garantías
 
-- `functions/api/photos/*`: configuración y subida pública con Turnstile.
-- `functions/api/admin/[[path]].js`: consulta, lectura privada, borrado y apertura/cierre.
+- `worker/photo-api.js`: Worker dedicado que sirve configuración, subida y administración bajo `/api/photos/*` y `/api/admin/*`.
+- `functions/api/photos/*` y `functions/api/admin/[[path]].js`: handlers compartidos por el Worker y el desarrollo local.
 - `migrations/0001_photo_uploads.sql`: metadatos, contadores, reservas, idempotencia y rate limit.
 - R2 (`WEDDING_PHOTOS`): binarios privados con nombres aleatorios generados en servidor.
 - D1 (`WEDDING_DB`): metadatos y contadores; nunca se recorre R2 para calcular el uso.
+- La API vive en un Worker separado porque el backend de despliegue de Pages rechazaba la generación del binding D1; las rutas públicas permanecen en el mismo dominio y Angular continúa en Pages.
 - El límite económico está fijado exactamente a 8 GB (8.000.000.000 bytes) tanto en configuración como en código. Los triggers de D1 reservan bytes y cuota por dispositivo dentro de un `batch` transaccional antes de escribir en R2, evitando carreras entre subidas concurrentes.
 - El identificador persistente del navegador se transforma con SHA-256 y un salt secreto antes de guardarlo. Se utiliza para el rate limiting, no para limitar el número total de fotos. La IP solo participa como límite secundario y nunca como identidad única.
 - Se inspeccionan las firmas binarias de JPEG, PNG, WebP y HEIC/HEIF; cambiar una extensión no permite subir otro tipo de archivo.

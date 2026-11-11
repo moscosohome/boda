@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "boda-fotos-api",
+  "main": "worker/photo-api.js",
+  "compatibility_date": "2026-11-11",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "cristinayantonio.com.es/api/photos/*",
+      "zone_name": "cristinayantonio.com.es"
+    },
+    {
+      "pattern": "cristinayantonio.com.es/api/admin/*",
+      "zone_name": "cristinayantonio.com.es"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "WEDDING_DB",
+      "database_name": "boda-fotos-prod",
+      "database_id": "8745606a-7f88-4242-9098-45c4b6cfbe76",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "WEDDING_PHOTOS",
+      "bucket_name": "boda-fotos-private",
+      "preview_bucket_name": "boda-fotos-private-preview"
+    }
+  ],
+  "vars": {
+    "MAX_STORAGE_BYTES": "8000000000",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAF8vUp8_txIieGwa",
+    "TURNSTILE_EXPECTED_HOSTNAME": "cristinayantonio.com.es",
+    "CF_ACCESS_TEAM_DOMAIN": "https://amfhomeassistant.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "adf813f68ea4e746df66d1b0920427db56dd6740b5b3a2d439e7d757cd68ee5c"
+  }
+}

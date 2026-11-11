@@ -3,21 +3,6 @@
   "name": "boda",
   "compatibility_date": "2026-11-11",
   "pages_build_output_dir": "dist/boda-cristina-antonio/browser",
-  "d1_databases": [
-    {
-      "binding": "WEDDING_DB",
-      "database_name": "boda-fotos",
-      "database_id": "e3f5119d-084d-4d1b-b3df-227c02fc2428",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "WEDDING_PHOTOS",
-      "bucket_name": "boda-fotos-private",
-      "preview_bucket_name": "boda-fotos-private-preview"
-    }
-  ],
   "vars": {
     "MAX_STORAGE_BYTES": "8000000000",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAF8vUp8_txIieGwa",
