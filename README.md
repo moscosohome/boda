@@ -109,3 +109,92 @@ Incluyen fade/scale del hero, entradas de títulos, reveal de fotos, crecimiento
 - Se evita Angular Material para mantener una estética propia y reducir peso.
 - La arquitectura separa `core`, `shared` y `features` para facilitar el mantenimiento.
 - GSAP se limita a la narrativa de scroll; animaciones simples usan CSS o IntersectionObserver.
+
+## Álbum privado de fotografías
+
+La ruta pública `/fotos` permite seleccionar hasta 3 imágenes por tanda, sin límite acumulado por navegador. Optimiza en cliente las imágenes compatibles (máximo 2560 px, JPEG al 88 %) y conserva el original cuando el navegador no puede decodificarlo, como puede ocurrir con HEIC. El servidor vuelve a comprobar todos los límites; el frontend no se considera una barrera de seguridad.
+
+La ruta `/admin-fotos` muestra el uso, las últimas fotografías, permite eliminarlas y abrir o cerrar las subidas. R2 es privado: las imágenes se sirven únicamente desde `/api/admin/photo` después de validar Cloudflare Access.
+
+### Arquitectura y garantías
+
+- `functions/api/photos/*`: configuración y subida pública con Turnstile.
+- `functions/api/admin/[[path]].js`: consulta, lectura privada, borrado y apertura/cierre.
+- `migrations/0001_photo_uploads.sql`: metadatos, contadores, reservas, idempotencia y rate limit.
+- R2 (`WEDDING_PHOTOS`): binarios privados con nombres aleatorios generados en servidor.
+- D1 (`WEDDING_DB`): metadatos y contadores; nunca se recorre R2 para calcular el uso.
+- El límite económico está fijado exactamente a 8 GB (8.000.000.000 bytes) tanto en configuración como en código. Los triggers de D1 reservan bytes y cuota por dispositivo dentro de un `batch` transaccional antes de escribir en R2, evitando carreras entre subidas concurrentes.
+- El identificador persistente del navegador se transforma con SHA-256 y un salt secreto antes de guardarlo. Se utiliza para el rate limiting, no para limitar el número total de fotos. La IP solo participa como límite secundario y nunca como identidad única.
+- Se inspeccionan las firmas binarias de JPEG, PNG, WebP y HEIC/HEIF; cambiar una extensión no permite subir otro tipo de archivo.
+
+### Crear recursos en Cloudflare (una sola vez)
+
+No ejecutes el despliegue hasta sustituir todos los `REPLACE_WITH_...` de `wrangler.jsonc` y revisar que el nombre del proyecto Pages coincide con el existente. Al incorporar un archivo Wrangler, este pasa a ser la fuente de verdad de la configuración de Pages. Conserva también cualquier ajuste actual del dashboard; los secretos de Telegram siguen siendo necesarios.
+
+```bash
+npx wrangler login
+npx wrangler d1 create boda-fotos
+npx wrangler r2 bucket create boda-fotos-private
+npx wrangler r2 bucket create boda-fotos-private-preview
+```
+
+Copia el `database_id` devuelto por el primer comando en `wrangler.jsonc`. En **Turnstile → Add widget**, crea un widget para `cristinayantonio.com.es`, copia su site key en `TURNSTILE_SITE_KEY` y guarda la clave secreta con:
+
+```bash
+npx wrangler pages secret put TURNSTILE_SECRET_KEY --project-name boda
+openssl rand -hex 32
+npx wrangler pages secret put DEVICE_HASH_SALT --project-name boda
+```
+
+El valor producido por `openssl` es el que debes pegar cuando el segundo comando lo solicite. No se guarda en el repositorio. Aplica después la migración remota:
+
+```bash
+npx wrangler d1 migrations apply boda-fotos --remote
+```
+
+### Proteger la administración con Cloudflare Access
+
+En **Cloudflare Zero Trust → Access controls → Applications**, crea una aplicación **Self-hosted** y añade a la misma aplicación estos dos destinos públicos:
+
+```text
+cristinayantonio.com.es/admin-fotos*
+cristinayantonio.com.es/api/admin/*
+```
+
+Añade una política `Allow` limitada a los correos de los novios. Copia el dominio del equipo y el **Application Audience (AUD) Tag** en `CF_ACCESS_TEAM_DOMAIN` y `CF_ACCESS_AUD` de `wrangler.jsonc`. La Function no confía solo en que la URL esté oculta: valida firma RS256, issuer, audience y caducidad del JWT enviado por Access.
+
+Protege también el dominio `*.pages.dev` del proyecto o desactiva su acceso público para que no exista una vía alternativa sin Access. `ADMIN_DEV_TOKEN` es exclusivamente una ayuda local y no debe configurarse nunca en preview ni producción.
+
+### Probar todo en local
+
+Crea `.dev.vars` (está ignorado por Git) con claves de prueba de Turnstile y valores locales:
+
+```dotenv
+TURNSTILE_SECRET_KEY=CLAVE_SECRETA_DE_PRUEBA_DE_TURNSTILE
+DEVICE_HASH_SALT=un-valor-local-largo-y-aleatorio
+ADMIN_DEV_TOKEN=un-token-solo-para-local
+```
+
+Para pruebas locales cambia temporalmente `TURNSTILE_SITE_KEY` por la site key de prueba oficial de Turnstile y `TURNSTILE_EXPECTED_HOSTNAME` por `localhost`. No confirmes esos cambios. Luego:
+
+```bash
+npm install
+npm run build
+npx wrangler d1 migrations apply boda-fotos --local
+npx wrangler pages dev dist/boda-cristina-antonio/browser
+```
+
+Abre `http://localhost:8788/fotos`. Para `/admin-fotos`, introduce el mismo `ADMIN_DEV_TOKEN` cuando aparezca el formulario local. Los datos D1 y R2 que usa `wrangler pages dev` son locales.
+
+Casos mínimos a comprobar antes de la boda: selección de más de 3, varias tandas consecutivas, archivo de más de 8 MB, vídeo renombrado a JPG, reintento sin conexión, cierre desde administración, borrado, iPhone/Safari con HEIC y Android/Chrome.
+
+### Despliegue
+
+Con Git integration, confirma los cambios y deja que el proyecto Pages existente construya con `npm run build`; el directorio de salida es `dist/boda-cristina-antonio/browser`. Como alternativa manual, después de revisar toda la configuración:
+
+```bash
+npm run build
+npx wrangler pages deploy dist/boda-cristina-antonio/browser --project-name boda
+```
+
+Este repositorio no crea ni modifica recursos reales por sí solo. La migración remota, los secretos, Access y el despliegue requieren los comandos o pasos anteriores.

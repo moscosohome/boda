@@ -1,0 +1,118 @@
+<main class="photos-page">
+  <header class="photo-header">
+    <a href="/" class="brand" aria-label="Cristina y Antonio, volver a la invitación">
+      <img src="images/logosololetras.png" alt="" width="789" height="557" />
+    </a>
+    <p class="couple">Cristina &amp; Antonio</p>
+    <p class="date">04 · 09 · 2027</p>
+  </header>
+
+  @if (complete()) {
+    <section class="success-card" aria-live="polite">
+      <div class="polaroids" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="eyebrow">Recuerdos compartidos</p>
+      <h1>¡Ya las tenemos! <span aria-hidden="true">♥</span></h1>
+      <p>Gracias por compartir este pedacito de nuestra boda con nosotros.</p>
+      <button type="button" class="secondary-button" (click)="shareMore()">
+        Compartir más recuerdos
+      </button>
+    </section>
+  } @else {
+    <section class="upload-card" aria-labelledby="photos-title">
+      <p class="eyebrow">Nuestra boda, a través de tus ojos</p>
+      <h1 id="photos-title">Comparte tus recuerdos</h1>
+      <p class="intro">Nos encantará ver nuestra boda a través de tus ojos.</p>
+
+      @if (loading()) {
+        <p class="loading" aria-live="polite">Preparando el álbum…</p>
+      } @else if (config() && !config()!.uploadsOpen) {
+        <div class="closed-message" role="status">
+          <span aria-hidden="true">◇</span>
+          <h2>El álbum está cerrado</h2>
+          <p>Gracias por querer compartir tus recuerdos con nosotros.</p>
+        </div>
+      } @else if (config()) {
+        <label class="picker" [class.is-disabled]="uploading() || preparing()">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+            multiple
+            [disabled]="uploading() || preparing() || selected().length >= 3"
+            (change)="chooseFiles($event)"
+          />
+          <span class="picker-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28">
+              <path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4zM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+            </svg>
+          </span>
+          <span class="picker-title">{{ preparing() ? 'Preparando fotos…' : 'Seleccionar fotos' }}</span>
+          <span class="picker-hint">JPG, PNG, WebP o HEIC · máximo 8 MB</span>
+        </label>
+
+        @if (selected().length) {
+          <ul class="preview-grid" aria-label="Fotografías seleccionadas">
+            @for (photo of selected(); track photo.id) {
+              <li [class.has-error]="photo.failed">
+                @if (photo.previewAvailable) {
+                  <img
+                    [src]="photo.previewUrl"
+                    alt="Vista previa de la foto seleccionada"
+                    (error)="markPreviewUnavailable(photo.id)"
+                  />
+                } @else {
+                  <span class="heic-placeholder" aria-label="Foto HEIC seleccionada">HEIC</span>
+                }
+                <button
+                  type="button"
+                  class="remove-photo"
+                  [disabled]="uploading()"
+                  (click)="removePhoto(photo.id)"
+                  aria-label="Eliminar esta foto de la selección"
+                >×</button>
+                @if (photo.failed) {
+                  <span class="retry-label">Reintentar</span>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        <div id="photo-turnstile" class="turnstile" aria-label="Verificación de seguridad"></div>
+
+        @if (error()) {
+          <p class="error-message" role="alert">{{ error() }}</p>
+        }
+
+        @if (uploading()) {
+          <div class="progress-block" aria-live="polite">
+            <div class="progress-copy">
+              <span>Compartiendo recuerdos…</span><strong>{{ progress() }} %</strong>
+            </div>
+            <div
+              class="progress-track"
+              role="progressbar"
+              aria-label="Progreso de subida"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-valuenow]="progress()"
+            >
+              <span [style.width.%]="progress()"></span>
+            </div>
+          </div>
+        }
+
+        <button
+          type="button"
+          class="share-button"
+          [disabled]="!selected().length || uploading() || preparing() || !turnstileReady()"
+          (click)="upload()"
+        >
+          {{ uploading() ? 'Compartiendo…' : 'Compartir fotos' }}
+        </button>
+        <p class="privacy-note">Solo Cristina y Antonio podrán ver las fotografías.</p>
+      }
+    </section>
+  }
+</main>

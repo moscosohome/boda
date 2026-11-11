@@ -1,0 +1,39 @@
+<main class="admin-page">
+  <header>
+    <div><p class="kicker">Cristina &amp; Antonio</p><h1>Fotos de la boda</h1></div>
+    <a href="/" class="home-link">Ver invitación</a>
+  </header>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    <form class="dev-access" (submit)="$event.preventDefault(); useDevToken()">
+      <label for="dev-token">Token local de administración</label>
+      <div><input id="dev-token" type="password" autocomplete="off" [value]="devToken()" (input)="devToken.set($any($event.target).value)" /><button type="submit">Entrar en local</button></div>
+    </form>
+  }
+  @if (loading()) {
+    <p>Cargando álbum…</p>
+  } @else if (summary(); as data) {
+    <section class="stats" aria-label="Resumen del álbum">
+      <article><span>Total</span><strong>{{ data.settings.totalPhotos.toLocaleString('es-ES') }}</strong><small>fotografías</small></article>
+      <article><span>Espacio ocupado</span><strong>{{ formatBytes(data.settings.usedBytes) }}</strong><small>de {{ formatBytes(data.settings.maxStorageBytes) }}</small></article>
+      <article><span>Uso</span><strong>{{ percentage().toFixed(1) }} %</strong><small>{{ formatBytes(data.settings.reservedBytes) }} reservados</small></article>
+    </section>
+    <div class="storage-track" role="progressbar" aria-label="Almacenamiento utilizado" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="percentage().toFixed(1)"><span [style.width.%]="percentage()"></span></div>
+    <section class="controls">
+      <div><span>Estado</span><strong [class.open]="data.settings.uploadsOpen">{{ data.settings.uploadsOpen ? 'SUBIDAS ABIERTAS' : 'SUBIDAS CERRADAS' }}</strong></div>
+      <button type="button" (click)="toggleUploads()" [disabled]="changing()">{{ changing() ? 'Guardando…' : (data.settings.uploadsOpen ? 'Cerrar subidas' : 'Abrir subidas') }}</button>
+    </section>
+    <section class="gallery" aria-labelledby="gallery-title">
+      <h2 id="gallery-title">Últimas fotografías</h2>
+      @if (!data.photos.length) { <p>Todavía no hay fotografías.</p> }
+      <ul>
+        @for (photo of data.photos; track photo.id) {
+          <li>
+            <a [href]="photoUrl(photo.id)" target="_blank" rel="noopener" aria-label="Abrir fotografía"><img [src]="photoUrl(photo.id)" alt="Fotografía subida por un invitado" loading="lazy" /></a>
+            <div><time [attr.datetime]="photo.uploaded_at">{{ photo.uploaded_at | date: 'short' }}</time><button type="button" (click)="deletePhoto(photo)" aria-label="Eliminar fotografía">Eliminar</button></div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</main>
