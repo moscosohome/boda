@@ -81,6 +81,13 @@
 
         <div id="photo-turnstile" class="turnstile" aria-label="Verificación de seguridad"></div>
 
+        @if (turnstileError()) {
+          <div class="security-error" role="alert">
+            <p>{{ turnstileError() }}</p>
+            <button type="button" (click)="retryTurnstile()">Volver a intentarlo</button>
+          </div>
+        }
+
         @if (error()) {
           <p class="error-message" role="alert">{{ error() }}</p>
         }

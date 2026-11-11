@@ -30,6 +30,9 @@ h1 { margin: .45rem 0 0; font-family: var(--font-serif); font-size: clamp(2.5rem
 .heic-placeholder { display: grid; height: 100%; place-items: center; color: var(--color-rose-text); font-weight: 800; letter-spacing: .12em; }
 .retry-label { position: absolute; right: .3rem; bottom: .15rem; color: #7b3139; font-size: .64rem; font-weight: 800; }
 .turnstile { min-height: 65px; margin: .6rem auto; }
+.security-error { margin: .6rem 0; color: #74343b; font-size: .84rem; }
+.security-error p { margin: 0 0 .35rem; }
+.security-error button { border: 0; padding: .25rem .45rem; background: transparent; color: #74343b; font: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; }
 .error-message { border-radius: .6rem; padding: .7rem; background: rgba(163,79,88,.1); color: #74343b; font-size: .88rem; }
 .share-button,.secondary-button { width: 100%; min-height: 3.4rem; border: 0; border-radius: 999px; padding: .8rem 1.3rem; background: var(--color-olive-dark); color: var(--color-ivory); font-weight: 800; cursor: pointer; transition: transform 180ms ease,opacity 180ms ease; }
 .share-button:hover:not(:disabled),.secondary-button:hover { transform: translateY(-2px); }
