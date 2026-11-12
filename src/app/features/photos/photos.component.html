@@ -16,14 +16,19 @@
       <h1>¡Ya las tenemos! <span aria-hidden="true">♥</span></h1>
       <p>Gracias por compartir este pedacito de nuestra boda con nosotros.</p>
       <button type="button" class="secondary-button" (click)="shareMore()">
-        Compartir más recuerdos
+        Subir más fotos
       </button>
     </section>
   } @else {
     <section class="upload-card" aria-labelledby="photos-title">
       <p class="eyebrow">Nuestra boda, a través de tus ojos</p>
-      <h1 id="photos-title">Comparte tus recuerdos</h1>
-      <p class="intro">Nos encantará ver nuestra boda a través de tus ojos.</p>
+      <h1 id="photos-title" class="upload-title" aria-label="Comparte tus recuerdos">
+        <span class="title-line" aria-hidden="true"><span>Comparte</span></span>
+        <span class="title-line" aria-hidden="true"><span>tus recuerdos</span></span>
+      </h1>
+      <p class="intro">
+        Cada foto guarda un instante. <span>Compártelo con nosotros.</span>
+      </p>
 
       @if (loading()) {
         <p class="loading" aria-live="polite">Preparando el álbum…</p>
@@ -34,27 +39,39 @@
           <p>Gracias por querer compartir tus recuerdos con nosotros.</p>
         </div>
       } @else if (config()) {
-        <label class="picker" [class.is-disabled]="uploading() || preparing()">
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-            multiple
-            [disabled]="uploading() || preparing() || selected().length >= 3"
-            (change)="chooseFiles($event)"
-          />
-          <span class="picker-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="28" height="28">
-              <path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4zM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-            </svg>
-          </span>
-          <span class="picker-title">{{ preparing() ? 'Preparando fotos…' : 'Seleccionar fotos' }}</span>
-          <span class="picker-hint">JPG, PNG, WebP o HEIC · máximo 8 MB</span>
-        </label>
+        @if (selected().length < 3) {
+          <label class="picker" [class.is-disabled]="uploading() || preparing()">
+            <span class="picker-flash" aria-hidden="true"></span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+              [disabled]="uploading() || preparing()"
+              (click)="animateShutter()"
+              (change)="chooseFiles($event)"
+            />
+            <span class="camera-stage" aria-hidden="true">
+              <span class="focus-ring"></span>
+              <span class="picker-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28">
+                  <path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4zM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                </svg>
+              </span>
+            </span>
+            <span class="picker-title">{{ preparing() ? 'Preparando tu recuerdo…' : 'Abre tu galería' }}</span>
+            <span class="picker-invitation">Toca para añadir una foto</span>
+            <span class="picker-hint">JPG, PNG, WebP o HEIC · máximo 8 MB</span>
+          </label>
+        }
 
         @if (selected().length) {
           <ul class="preview-grid" aria-label="Fotografías seleccionadas">
             @for (photo of selected(); track photo.id) {
-              <li [class.has-error]="photo.failed">
+              <li
+                class="photo-card"
+                [class.has-error]="photo.failed"
+                [class.is-developing]="uploading()"
+                [attr.data-photo-id]="photo.id"
+              >
                 @if (photo.previewAvailable) {
                   <img
                     [src]="photo.previewUrl"
@@ -64,6 +81,11 @@
                 } @else {
                   <span class="heic-placeholder" aria-label="Foto HEIC seleccionada">HEIC</span>
                 }
+                <span
+                  class="develop-wash"
+                  aria-hidden="true"
+                  [style.opacity]="uploading() ? 1 - progress() / 100 : 0"
+                ></span>
                 <button
                   type="button"
                   class="remove-photo"
@@ -95,7 +117,7 @@
         @if (uploading()) {
           <div class="progress-block" aria-live="polite">
             <div class="progress-copy">
-              <span>Compartiendo recuerdos…</span><strong>{{ progress() }} %</strong>
+              <span>Revelando y subiendo…</span><strong>{{ progress() }} %</strong>
             </div>
             <div
               class="progress-track"
@@ -116,7 +138,7 @@
           [disabled]="!selected().length || uploading() || preparing() || !turnstileReady()"
           (click)="upload()"
         >
-          {{ uploading() ? 'Compartiendo…' : 'Compartir fotos' }}
+          {{ uploading() ? 'Subiendo fotos…' : 'Subir fotos' }}
         </button>
         <p class="privacy-note">Solo Cristina y Antonio podrán ver las fotografías.</p>
       } @else {

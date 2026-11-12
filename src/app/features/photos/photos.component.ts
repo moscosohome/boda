@@ -1,5 +1,7 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, OnDestroy, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, inject, signal } from '@angular/core';
+import confetti from 'canvas-confetti';
+import gsap from 'gsap';
 import { PhotoUploadConfig } from '../../core/models/photo-upload.model';
 import { PhotoUploadService } from '../../core/services/photo-upload.service';
 
@@ -45,6 +47,7 @@ function createUuid(): string {
 })
 export class PhotosComponent implements AfterViewInit, OnDestroy {
   private readonly document = inject(DOCUMENT);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly service = inject(PhotoUploadService);
   protected readonly config = signal<PhotoUploadConfig | null>(null);
   protected readonly selected = signal<SelectedPhoto[]>([]);
@@ -59,6 +62,9 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
   private turnstileToken = '';
   private turnstileWidgetId?: string;
   private viewReady = false;
+  private reducedMotion = false;
+  private entranceContext?: gsap.Context;
+  private shutterTimeline?: gsap.core.Timeline;
 
   constructor() {
     void this.loadConfig();
@@ -66,11 +72,18 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.viewReady = true;
+    this.reducedMotion =
+      this.document.defaultView?.matchMedia('(prefers-reduced-motion: reduce)').matches ?? false;
+    this.setupEntranceAnimation();
     void this.setupTurnstile();
   }
 
   ngOnDestroy(): void {
     this.selected().forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+    this.shutterTimeline?.kill();
+    this.entranceContext?.revert();
+    gsap.killTweensOf(this.host.nativeElement.querySelectorAll('*'));
+    confetti.reset();
   }
 
   protected async chooseFiles(event: Event): Promise<void> {
@@ -107,6 +120,9 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     }
     this.selected.set([...current, ...added]);
     this.preparing.set(false);
+    this.document.defaultView?.requestAnimationFrame(() => {
+      this.animateNewPhotos(added.map((photo) => photo.id));
+    });
   }
 
   protected removePhoto(id: string): void {
@@ -132,6 +148,7 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     this.uploading.set(true);
     this.progress.set(0);
     this.selected.update((photos) => photos.map((photo) => ({ ...photo, failed: false })));
+    this.document.defaultView?.requestAnimationFrame(() => this.animateUploadStart());
 
     try {
       const result = await this.service.upload(
@@ -154,6 +171,7 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
         this.error.set('Ha habido un problema al subir algunas fotos. Puedes volver a intentarlo.');
       } else {
         this.complete.set(true);
+        this.document.defaultView?.requestAnimationFrame(() => this.animateSuccess());
       }
     } catch (reason) {
       this.error.set(reason instanceof Error ? reason.message : 'Ha habido un problema durante la subida.');
@@ -170,6 +188,26 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  protected animateShutter(): void {
+    if (this.reducedMotion) return;
+    const icon = this.host.nativeElement.querySelector<HTMLElement>('.picker-icon');
+    const flash = this.host.nativeElement.querySelector<HTMLElement>('.picker-flash');
+    if (!icon || !flash) return;
+
+    this.shutterTimeline?.kill();
+    this.shutterTimeline = gsap
+      .timeline()
+      .to(icon, { scale: 0.82, rotation: -7, duration: 0.08, ease: 'power2.in' })
+      .fromTo(
+        flash,
+        { autoAlpha: 0 },
+        { autoAlpha: 0.72, duration: 0.06, ease: 'power1.out' },
+        '<',
+      )
+      .to(flash, { autoAlpha: 0, duration: 0.28, ease: 'power2.out' })
+      .to(icon, { scale: 1, rotation: 0, duration: 0.28, ease: 'back.out(2.2)' }, '<');
+  }
+
   private async loadConfig(): Promise<void> {
     try {
       this.config.set(await this.service.getConfig());
@@ -177,6 +215,7 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
       this.error.set(reason instanceof Error ? reason.message : 'No podemos abrir la subida ahora mismo.');
     } finally {
       this.loading.set(false);
+      this.document.defaultView?.requestAnimationFrame(() => this.animatePickerReveal());
       void this.setupTurnstile();
     }
   }
@@ -272,6 +311,196 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private setupEntranceAnimation(): void {
+    if (this.reducedMotion) return;
+    this.entranceContext = gsap.context(() => {
+      const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      timeline
+        .from('.photo-header > *', {
+          y: -12,
+          opacity: 0,
+          duration: 0.58,
+          stagger: 0.08,
+          clearProps: 'transform,opacity',
+        })
+        .from(
+          '.upload-card',
+          {
+            y: 24,
+            scale: 0.985,
+            opacity: 0,
+            duration: 0.68,
+            clearProps: 'transform,opacity',
+          },
+          '-=0.34',
+        )
+        .from(
+          '.upload-card > .eyebrow',
+          {
+            y: 10,
+            opacity: 0,
+            duration: 0.42,
+            clearProps: 'transform,opacity',
+          },
+          '-=0.34',
+        )
+        .from(
+          '.upload-title .title-line > span',
+          {
+            yPercent: 115,
+            rotation: 1.5,
+            duration: 0.62,
+            stagger: 0.09,
+            ease: 'power4.out',
+            clearProps: 'transform',
+          },
+          '-=0.25',
+        )
+        .from(
+          '.upload-card > .intro',
+          {
+            y: 10,
+            opacity: 0,
+            duration: 0.42,
+            clearProps: 'transform,opacity',
+          },
+          '-=0.34',
+        );
+    }, this.host.nativeElement);
+  }
+
+  private animatePickerReveal(): void {
+    if (this.reducedMotion) return;
+    const picker = this.host.nativeElement.querySelector<HTMLElement>('.picker');
+    const camera = picker?.querySelector<HTMLElement>('.camera-stage');
+    if (!picker || !camera) return;
+
+    const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    timeline
+      .from(picker, {
+        y: 18,
+        scale: 0.985,
+        opacity: 0,
+        duration: 0.55,
+        clearProps: 'transform,opacity',
+      })
+      .from(
+        camera,
+        {
+          scale: 0.65,
+          rotation: -12,
+          opacity: 0,
+          duration: 0.5,
+          ease: 'back.out(1.8)',
+          clearProps: 'transform,opacity',
+        },
+        '-=0.28',
+      )
+      .from(
+        picker.querySelectorAll('.picker-title, .picker-invitation, .picker-hint'),
+        {
+          y: 7,
+          opacity: 0,
+          duration: 0.32,
+          stagger: 0.06,
+          clearProps: 'transform,opacity',
+        },
+        '-=0.25',
+      );
+  }
+
+  private animateNewPhotos(ids: string[]): void {
+    if (this.reducedMotion || !ids.length) return;
+    const cards = [...this.host.nativeElement.querySelectorAll<HTMLElement>('.photo-card')].filter(
+      (card) => ids.includes(card.dataset['photoId'] ?? ''),
+    );
+    if (!cards.length) return;
+
+    gsap.from(cards, {
+      y: 34,
+      scale: 0.84,
+      rotation: (index) => [-7, 6, -4][index % 3],
+      opacity: 0,
+      duration: 0.62,
+      stagger: 0.1,
+      ease: 'back.out(1.55)',
+      clearProps: 'transform,opacity',
+    });
+    gsap.from(
+      cards
+        .map((card) => card.querySelector('img'))
+        .filter((image): image is HTMLImageElement => image instanceof HTMLImageElement),
+      {
+        filter: 'sepia(.85) saturate(.3) contrast(.82) brightness(1.12)',
+        duration: 1.25,
+        stagger: 0.1,
+        ease: 'power2.out',
+        clearProps: 'filter',
+      },
+    );
+  }
+
+  private animateUploadStart(): void {
+    if (this.reducedMotion) return;
+    const cards = this.host.nativeElement.querySelectorAll<HTMLElement>('.photo-card');
+    gsap.fromTo(
+      cards,
+      { scale: 1 },
+      { scale: 0.975, duration: 0.18, yoyo: true, repeat: 1, stagger: 0.05, ease: 'sine.inOut' },
+    );
+  }
+
+  private animateSuccess(): void {
+    const card = this.host.nativeElement.querySelector<HTMLElement>('.success-card');
+    if (!card || this.reducedMotion) return;
+
+    const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    timeline
+      .from(card, { y: 22, opacity: 0, duration: 0.5, clearProps: 'transform,opacity' })
+      .from(
+        card.querySelectorAll('.polaroids span'),
+        {
+          y: -42,
+          scale: 0.7,
+          rotation: (index) => [-22, 4, 20][index],
+          opacity: 0,
+          duration: 0.58,
+          stagger: 0.09,
+          ease: 'back.out(1.7)',
+          clearProps: 'transform,opacity',
+        },
+        '-=0.28',
+      )
+      .from(
+        card.querySelectorAll(':scope > .eyebrow, :scope > h1, :scope > p, :scope > button'),
+        {
+          y: 12,
+          opacity: 0,
+          duration: 0.4,
+          stagger: 0.07,
+          clearProps: 'transform,opacity',
+        },
+        '-=0.26',
+      );
+
+    const petalShape = confetti.shapeFromPath(
+      'M12 1C20 3 25 10 22 17C19 24 10 25 4 20C-2 14 1 5 8 2C9 1 11 1 12 1Z',
+    );
+    const petals = {
+      particleCount: 24,
+      spread: 58,
+      startVelocity: 24,
+      gravity: 0.72,
+      scalar: 0.72,
+      ticks: 180,
+      colors: ['#e6b8b7', '#c17e82', '#d8c59b', '#fffaf2'],
+      shapes: [petalShape],
+      disableForReducedMotion: true,
+    } satisfies confetti.Options;
+    void confetti({ ...petals, angle: 62, origin: { x: 0.08, y: 0.62 } });
+    void confetti({ ...petals, angle: 118, origin: { x: 0.92, y: 0.62 } });
+  }
+
   private async setupTurnstile(): Promise<void> {
     const siteKey = this.config()?.turnstileSiteKey;
     if (!this.viewReady || !siteKey || this.turnstileWidgetId !== undefined) return;
@@ -282,6 +511,7 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
         sitekey: siteKey,
         theme: 'light',
         size: 'flexible',
+        appearance: 'interaction-only',
         action: 'photo-upload',
         callback: (token: string) => {
           this.turnstileToken = token;
