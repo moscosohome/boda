@@ -10,7 +10,8 @@ interface SelectedPhoto {
   file: File;
   previewUrl: string;
   previewAvailable: boolean;
-  failed: boolean;
+  status: 'queued' | 'uploading' | 'uploaded' | 'failed';
+  progress: number;
 }
 
 interface TurnstileApi {
@@ -56,13 +57,13 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
   protected readonly uploading = signal(false);
   protected readonly progress = signal(0);
   protected readonly error = signal('');
-  protected readonly complete = signal(false);
   protected readonly turnstileReady = signal(false);
   protected readonly turnstileError = signal('');
   private turnstileToken = '';
   private turnstileWidgetId?: string;
   private viewReady = false;
   private reducedMotion = false;
+  private celebratedFirstUpload = false;
   private entranceContext?: gsap.Context;
   private shutterTimeline?: gsap.core.Timeline;
 
@@ -94,18 +95,9 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
 
     this.error.set('');
     const current = this.selected();
-    const available = Math.max(0, 3 - current.length);
-    if (available === 0) {
-      this.error.set('Puedes seleccionar un máximo de 3 recuerdos por tanda.');
-      return;
-    }
-
-    if (files.length > available) {
-      this.error.set(`Solo hemos añadido ${available} ${available === 1 ? 'foto' : 'fotos'} para respetar el límite.`);
-    }
     this.preparing.set(true);
     const added: SelectedPhoto[] = [];
-    for (const file of files.slice(0, available)) {
+    for (const file of files.slice(0, 1)) {
       try {
         this.validateSourceFile(file);
         const photo = await this.preparePhoto(file);
@@ -123,13 +115,7 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     this.document.defaultView?.requestAnimationFrame(() => {
       this.animateNewPhotos(added.map((photo) => photo.id));
     });
-  }
-
-  protected removePhoto(id: string): void {
-    if (this.uploading()) return;
-    const photo = this.selected().find((item) => item.id === id);
-    if (photo) URL.revokeObjectURL(photo.previewUrl);
-    this.selected.update((photos) => photos.filter((item) => item.id !== id));
+    void this.uploadPending();
   }
 
   protected markPreviewUnavailable(id: string): void {
@@ -138,54 +124,79 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  protected async upload(): Promise<void> {
-    if (this.uploading() || !this.selected().length) return;
-    if (!this.turnstileToken) {
-      this.error.set('Espera un instante mientras verificamos que la subida es segura.');
-      return;
-    }
+  protected retryPhoto(id: string): void {
+    this.error.set('');
+    this.selected.update((photos) =>
+      photos.map((photo) =>
+        photo.id === id ? { ...photo, status: 'queued', progress: 0 } : photo,
+      ),
+    );
+    void this.uploadPending(id);
+  }
+
+  private async uploadPending(preferredId?: string): Promise<void> {
+    if (this.uploading() || !this.turnstileToken) return;
+    const photo =
+      (preferredId
+        ? this.selected().find((item) => item.id === preferredId && item.status === 'queued')
+        : undefined) ?? this.selected().find((item) => item.status === 'queued');
+    if (!photo) return;
+
     this.error.set('');
     this.uploading.set(true);
     this.progress.set(0);
-    this.selected.update((photos) => photos.map((photo) => ({ ...photo, failed: false })));
-    this.document.defaultView?.requestAnimationFrame(() => this.animateUploadStart());
+    this.selected.update((photos) =>
+      photos.map((item) =>
+        item.id === photo.id ? { ...item, status: 'uploading', progress: 0 } : item,
+      ),
+    );
+    this.document.defaultView?.requestAnimationFrame(() => this.animateUploadStart(photo.id));
 
     try {
       const result = await this.service.upload(
-        this.selected().map((photo) => photo.file),
+        [photo.file],
         this.turnstileToken,
-        (value) => this.progress.set(value),
+        (value) => {
+          this.progress.set(value);
+          this.selected.update((photos) =>
+            photos.map((item) => (item.id === photo.id ? { ...item, progress: value } : item)),
+          );
+        },
       );
-      const succeededNames = new Set(
-        result.results.filter((item) => item.success).map((item) => item.clientName),
+      const succeeded = result.results.some(
+        (item) => item.success && item.clientName === photo.file.name,
       );
-      const remaining = this.selected()
-        .filter((photo) => !succeededNames.has(photo.file.name))
-        .map((photo) => ({ ...photo, failed: true }));
-      this.selected()
-        .filter((photo) => succeededNames.has(photo.file.name))
-        .forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
-      this.selected.set(remaining);
-      this.progress.set(100);
-      if (remaining.length) {
-        this.error.set('Ha habido un problema al subir algunas fotos. Puedes volver a intentarlo.');
+      if (succeeded) {
+        this.progress.set(100);
+        this.selected.update((photos) =>
+          photos.map((item) =>
+            item.id === photo.id ? { ...item, status: 'uploaded', progress: 100 } : item,
+          ),
+        );
+        this.document.defaultView?.requestAnimationFrame(() => this.animateUploadedPhoto(photo.id));
+        if (!this.celebratedFirstUpload) {
+          this.celebratedFirstUpload = true;
+          this.celebrateFirstUpload();
+        }
       } else {
-        this.complete.set(true);
-        this.document.defaultView?.requestAnimationFrame(() => this.animateSuccess());
+        this.markUploadFailed(photo.id);
       }
     } catch (reason) {
       this.error.set(reason instanceof Error ? reason.message : 'Ha habido un problema durante la subida.');
-      this.selected.update((photos) => photos.map((photo) => ({ ...photo, failed: true })));
+      this.markUploadFailed(photo.id);
     } finally {
       this.uploading.set(false);
       this.resetTurnstile();
     }
   }
 
-  protected shareMore(): void {
-    this.complete.set(false);
-    this.progress.set(0);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  private markUploadFailed(id: string): void {
+    this.selected.update((photos) =>
+      photos.map((photo) =>
+        photo.id === id ? { ...photo, status: 'failed', progress: 0 } : photo,
+      ),
+    );
+    this.error.set('No hemos podido subir esa foto. Tócala para volver a intentarlo.');
   }
 
   protected animateShutter(): void {
@@ -298,7 +309,8 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
       file: output,
       previewUrl: URL.createObjectURL(output),
       previewAvailable: true,
-      failed: false,
+      status: 'queued',
+      progress: 0,
     };
   }
 
@@ -416,6 +428,9 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     );
     if (!cards.length) return;
 
+    const stack = this.host.nativeElement.querySelector<HTMLElement>('.preview-stack');
+    stack?.scrollTo({ left: stack.scrollWidth, behavior: 'smooth' });
+
     gsap.from(cards, {
       y: 34,
       scale: 0.84,
@@ -440,54 +455,40 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  private animateUploadStart(): void {
+  private animateUploadStart(id: string): void {
     if (this.reducedMotion) return;
-    const cards = this.host.nativeElement.querySelectorAll<HTMLElement>('.photo-card');
+    const card = [...this.host.nativeElement.querySelectorAll<HTMLElement>('.photo-card')].find(
+      (item) => item.dataset['photoId'] === id,
+    );
+    if (!card) return;
     gsap.fromTo(
-      cards,
+      card,
       { scale: 1 },
-      { scale: 0.975, duration: 0.18, yoyo: true, repeat: 1, stagger: 0.05, ease: 'sine.inOut' },
+      { scale: 0.975, duration: 0.18, yoyo: true, repeat: 1, ease: 'sine.inOut' },
     );
   }
 
-  private animateSuccess(): void {
-    const card = this.host.nativeElement.querySelector<HTMLElement>('.success-card');
-    if (!card || this.reducedMotion) return;
+  private animateUploadedPhoto(id: string): void {
+    if (this.reducedMotion) return;
+    const card = [...this.host.nativeElement.querySelectorAll<HTMLElement>('.photo-card')].find(
+      (item) => item.dataset['photoId'] === id,
+    );
+    if (!card) return;
+    gsap.fromTo(
+      card,
+      { scale: 0.96 },
+      { scale: 1, duration: 0.42, ease: 'back.out(2)', clearProps: 'scale' },
+    );
+  }
 
-    const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    timeline
-      .from(card, { y: 22, opacity: 0, duration: 0.5, clearProps: 'transform,opacity' })
-      .from(
-        card.querySelectorAll('.polaroids span'),
-        {
-          y: -42,
-          scale: 0.7,
-          rotation: (index) => [-22, 4, 20][index],
-          opacity: 0,
-          duration: 0.58,
-          stagger: 0.09,
-          ease: 'back.out(1.7)',
-          clearProps: 'transform,opacity',
-        },
-        '-=0.28',
-      )
-      .from(
-        card.querySelectorAll(':scope > .eyebrow, :scope > h1, :scope > p, :scope > button'),
-        {
-          y: 12,
-          opacity: 0,
-          duration: 0.4,
-          stagger: 0.07,
-          clearProps: 'transform,opacity',
-        },
-        '-=0.26',
-      );
+  private celebrateFirstUpload(): void {
+    if (this.reducedMotion) return;
 
     const petalShape = confetti.shapeFromPath(
       'M12 1C20 3 25 10 22 17C19 24 10 25 4 20C-2 14 1 5 8 2C9 1 11 1 12 1Z',
     );
     const petals = {
-      particleCount: 24,
+      particleCount: 12,
       spread: 58,
       startVelocity: 24,
       gravity: 0.72,
@@ -517,6 +518,7 @@ export class PhotosComponent implements AfterViewInit, OnDestroy {
           this.turnstileToken = token;
           this.turnstileReady.set(true);
           this.turnstileError.set('');
+          void this.uploadPending();
         },
         'expired-callback': () => {
           this.turnstileToken = '';

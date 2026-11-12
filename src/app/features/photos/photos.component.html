@@ -7,148 +7,124 @@
     <p class="date">04 · 09 · 2027</p>
   </header>
 
-  @if (complete()) {
-    <section class="success-card" aria-live="polite">
-      <div class="polaroids" aria-hidden="true">
-        <span></span><span></span><span></span>
+  <section class="upload-card" aria-labelledby="photos-title">
+    <p class="eyebrow">Nuestra boda, a través de tus ojos</p>
+    <h1 id="photos-title" class="upload-title" aria-label="Comparte tus recuerdos">
+      <span class="title-line" aria-hidden="true"><span>Comparte</span></span>
+      <span class="title-line" aria-hidden="true"><span>tus recuerdos</span></span>
+    </h1>
+    <p class="intro">
+      Cada foto guarda un instante. <span>Compártelo con nosotros.</span>
+    </p>
+
+    @if (loading()) {
+      <p class="loading" aria-live="polite">Preparando el álbum…</p>
+    } @else if (config() && !config()!.uploadsOpen) {
+      <div class="closed-message" role="status">
+        <span aria-hidden="true">◇</span>
+        <h2>El álbum está cerrado</h2>
+        <p>Gracias por querer compartir tus recuerdos con nosotros.</p>
       </div>
-      <p class="eyebrow">Recuerdos compartidos</p>
-      <h1>¡Ya las tenemos! <span aria-hidden="true">♥</span></h1>
-      <p>Gracias por compartir este pedacito de nuestra boda con nosotros.</p>
-      <button type="button" class="secondary-button" (click)="shareMore()">
-        Subir más fotos
-      </button>
-    </section>
-  } @else {
-    <section class="upload-card" aria-labelledby="photos-title">
-      <p class="eyebrow">Nuestra boda, a través de tus ojos</p>
-      <h1 id="photos-title" class="upload-title" aria-label="Comparte tus recuerdos">
-        <span class="title-line" aria-hidden="true"><span>Comparte</span></span>
-        <span class="title-line" aria-hidden="true"><span>tus recuerdos</span></span>
-      </h1>
-      <p class="intro">
-        Cada foto guarda un instante. <span>Compártelo con nosotros.</span>
-      </p>
+    } @else if (config()) {
+      <label class="picker" [class.is-disabled]="uploading() || preparing()">
+        <span class="picker-flash" aria-hidden="true"></span>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+          [disabled]="uploading() || preparing()"
+          (click)="animateShutter()"
+          (change)="chooseFiles($event)"
+        />
+        <span class="camera-stage" aria-hidden="true">
+          <span class="focus-ring"></span>
+          <span class="picker-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28">
+              <path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4zM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+            </svg>
+          </span>
+        </span>
+        <span class="picker-title">{{ preparing() ? 'Preparando tu recuerdo…' : 'Abre tu galería' }}</span>
+        <span class="picker-invitation">Elige una foto y la subiremos al instante</span>
+        <span class="picker-hint">JPG, PNG, WebP o HEIC · máximo 8 MB</span>
+      </label>
 
-      @if (loading()) {
-        <p class="loading" aria-live="polite">Preparando el álbum…</p>
-      } @else if (config() && !config()!.uploadsOpen) {
-        <div class="closed-message" role="status">
-          <span aria-hidden="true">◇</span>
-          <h2>El álbum está cerrado</h2>
-          <p>Gracias por querer compartir tus recuerdos con nosotros.</p>
-        </div>
-      } @else if (config()) {
-        @if (selected().length < 3) {
-          <label class="picker" [class.is-disabled]="uploading() || preparing()">
-            <span class="picker-flash" aria-hidden="true"></span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-              [disabled]="uploading() || preparing()"
-              (click)="animateShutter()"
-              (change)="chooseFiles($event)"
-            />
-            <span class="camera-stage" aria-hidden="true">
-              <span class="focus-ring"></span>
-              <span class="picker-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28">
-                  <path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4zM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-                </svg>
-              </span>
-            </span>
-            <span class="picker-title">{{ preparing() ? 'Preparando tu recuerdo…' : 'Abre tu galería' }}</span>
-            <span class="picker-invitation">Toca para añadir una foto</span>
-            <span class="picker-hint">JPG, PNG, WebP o HEIC · máximo 8 MB</span>
-          </label>
-        }
+      @if (selected().length) {
+        <ul class="preview-stack" aria-label="Fotografías añadidas">
+          @for (photo of selected(); track photo.id; let index = $index) {
+            <li
+              class="photo-card"
+              [class.has-error]="photo.status === 'failed'"
+              [class.is-developing]="photo.status === 'uploading'"
+              [class.is-uploaded]="photo.status === 'uploaded'"
+              [style.--stack-index]="index"
+              [attr.data-photo-id]="photo.id"
+            >
+              @if (photo.previewAvailable) {
+                <img
+                  [src]="photo.previewUrl"
+                  alt="Foto añadida al álbum"
+                  (error)="markPreviewUnavailable(photo.id)"
+                />
+              } @else {
+                <span class="heic-placeholder" aria-label="Foto HEIC añadida">HEIC</span>
+              }
 
-        @if (selected().length) {
-          <ul class="preview-grid" aria-label="Fotografías seleccionadas">
-            @for (photo of selected(); track photo.id) {
-              <li
-                class="photo-card"
-                [class.has-error]="photo.failed"
-                [class.is-developing]="uploading()"
-                [attr.data-photo-id]="photo.id"
-              >
-                @if (photo.previewAvailable) {
-                  <img
-                    [src]="photo.previewUrl"
-                    alt="Vista previa de la foto seleccionada"
-                    (error)="markPreviewUnavailable(photo.id)"
-                  />
-                } @else {
-                  <span class="heic-placeholder" aria-label="Foto HEIC seleccionada">HEIC</span>
-                }
-                <span
-                  class="develop-wash"
-                  aria-hidden="true"
-                  [style.opacity]="uploading() ? 1 - progress() / 100 : 0"
-                ></span>
+              <span
+                class="develop-wash"
+                aria-hidden="true"
+                [style.opacity]="photo.status === 'uploading' ? 1 - photo.progress / 100 : 0"
+              ></span>
+
+              @if (photo.status === 'uploaded') {
+                <span class="upload-check" aria-label="Foto subida correctamente">✓</span>
+              } @else if (photo.status === 'queued') {
+                <span class="photo-status" aria-label="Esperando verificación">Preparando…</span>
+              } @else if (photo.status === 'uploading') {
+                <span class="photo-progress" aria-label="Progreso de subida">{{ photo.progress }}%</span>
+              } @else if (photo.status === 'failed') {
                 <button
                   type="button"
-                  class="remove-photo"
-                  [disabled]="uploading()"
-                  (click)="removePhoto(photo.id)"
-                  aria-label="Eliminar esta foto de la selección"
-                >×</button>
-                @if (photo.failed) {
-                  <span class="retry-label">Reintentar</span>
-                }
-              </li>
-            }
-          </ul>
-        }
+                  class="retry-photo"
+                  (click)="retryPhoto(photo.id)"
+                  aria-label="Reintentar la subida de esta foto"
+                >Reintentar</button>
+              }
+            </li>
+          }
+        </ul>
+      }
 
-        <div id="photo-turnstile" class="turnstile" aria-label="Verificación de seguridad"></div>
+      <div id="photo-turnstile" class="turnstile" aria-label="Verificación de seguridad"></div>
 
-        @if (turnstileError()) {
-          <div class="security-error" role="alert">
-            <p>{{ turnstileError() }}</p>
-            <button type="button" (click)="retryTurnstile()">Volver a intentarlo</button>
-          </div>
-        }
-
-        @if (error()) {
-          <p class="error-message" role="alert">{{ error() }}</p>
-        }
-
-        @if (uploading()) {
-          <div class="progress-block" aria-live="polite">
-            <div class="progress-copy">
-              <span>Revelando y subiendo…</span><strong>{{ progress() }} %</strong>
-            </div>
-            <div
-              class="progress-track"
-              role="progressbar"
-              aria-label="Progreso de subida"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              [attr.aria-valuenow]="progress()"
-            >
-              <span [style.width.%]="progress()"></span>
-            </div>
-          </div>
-        }
-
-        <button
-          type="button"
-          class="share-button"
-          [disabled]="!selected().length || uploading() || preparing() || !turnstileReady()"
-          (click)="upload()"
-        >
-          {{ uploading() ? 'Subiendo fotos…' : 'Subir fotos' }}
-        </button>
-        <p class="privacy-note">Solo Cristina y Antonio podrán ver las fotografías.</p>
-      } @else {
-        <div class="config-error" role="alert">
-          <p>{{ error() || 'No hemos podido preparar la subida de fotos.' }}</p>
-          <button type="button" class="secondary-button" (click)="retryConfig()">
-            Volver a intentarlo
-          </button>
+      @if (turnstileError()) {
+        <div class="security-error" role="alert">
+          <p>{{ turnstileError() }}</p>
+          <button type="button" (click)="retryTurnstile()">Volver a intentarlo</button>
         </div>
       }
-    </section>
-  }
+
+      @if (error()) {
+        <p class="error-message" role="alert">{{ error() }}</p>
+      }
+
+      @if (uploading()) {
+        <p class="auto-upload-status" aria-live="polite">
+          Revelando y subiendo… <strong>{{ progress() }}%</strong>
+        </p>
+      } @else if (selected().length) {
+        <p class="auto-upload-status is-ready" aria-live="polite">
+          Las fotos se guardan automáticamente.
+        </p>
+      }
+
+      <p class="privacy-note">Solo Cristina y Antonio podrán ver las fotografías.</p>
+    } @else {
+      <div class="config-error" role="alert">
+        <p>{{ error() || 'No hemos podido preparar la subida de fotos.' }}</p>
+        <button type="button" class="secondary-button" (click)="retryConfig()">
+          Volver a intentarlo
+        </button>
+      </div>
+    }
+  </section>
 </main>

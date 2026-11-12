@@ -71,7 +71,7 @@ export async function onRequestPost({ request, env }) {
   )
     .bind(deviceHash, ipHash, windowStart)
     .first();
-  if (Number(rate?.device_events ?? 0) >= 8 || Number(rate?.ip_events ?? 0) >= 60) {
+  if (Number(rate?.device_events ?? 0) >= 24 || Number(rate?.ip_events ?? 0) >= 180) {
     return errorResponse('RATE_LIMITED', 429);
   }
   await env.WEDDING_DB.batch([
